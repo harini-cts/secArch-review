@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}Add Application - Cognizant SecArch Portal{% endblock %}
+
+{% block content %}
+<style>
+/* Cloud Infrastructure Section Styles */
+.form-section-title {
+    color: #000048;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.form-section-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Cloud Option Cards */
+.cloud-option-card {
+    position: relative;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.cloud-option-card:hover {
+    border-color: #000048;
+    box-shadow: 0 4px 20px rgba(0, 0, 72, 0.1);
+    transform: translateY(-2px);
+}
+
+.cloud-option-card input[type="radio"] {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    transform: scale(1.2);
+}
+
+.cloud-option-card input[type="radio"]:checked + .cloud-option-label {
+    color: #000048;
+}
+
+.cloud-option-card input[type="radio"]:checked ~ .cloud-option-label,
+.cloud-option-card:has(input[type="radio"]:checked) {
+    border-color: #000048;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+}
+
+.cloud-option-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+.cloud-option-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.cloud-option-card:hover .cloud-option-icon,
+.cloud-option-card:has(input[type="radio"]:checked) .cloud-option-icon {
+    background: #000048;
+    color: white;
+}
+
+.cloud-option-content {
+    flex: 1;
+}
+
+.cloud-option-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.cloud-option-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+/* Cloud Providers Section */
+.cloud-providers-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 1px solid #e9ecef;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Provider Cards */
+.provider-card {
+    position: relative;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.25rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.provider-card:hover {
+    border-color: #000048;
+    box-shadow: 0 6px 25px rgba(0, 0, 72, 0.15);
+    transform: translateY(-3px);
+}
+
+.provider-card input[type="checkbox"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    transform: scale(1.1);
+}
+
+.provider-card input[type="checkbox"]:checked ~ .provider-label,
+.provider-card:has(input[type="checkbox"]:checked) {
+    border-color: #000048;
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+}
+
+.provider-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+.provider-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.aws-icon {
+    background: #ff9900;
+    color: white;
+}
+
+.azure-icon {
+    background: #0078d4;
+    color: white;
+}
+
+.gcp-icon {
+    background: #4285f4;
+    color: white;
+}
+
+/* Database Provider Icons */
+.mongodb-icon {
+    background: #4db33d;
+    color: white;
+}
+
+.postgresql-icon {
+    background: #336791;
+    color: white;
+}
+
+.mysql-icon {
+    background: #f29111;
+    color: white;
+}
+
+.provider-card:hover .provider-icon {
+    transform: scale(1.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.provider-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+
+.provider-card:has(input[type="checkbox"]:checked) .provider-name {
+    color: #000048;
+}
+
+/* Animation for cloud providers section */
+.cloud-providers-section {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-plus"></i> Add New Application</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="applicationForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Application Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="deployment_environment" class="form-label">Deployment Environment *</label>
+                                <select class="form-control" id="deployment_environment" name="deployment_environment" required>
+                                    <option value="">Select Environment</option>
+                                    <option value="development">Development</option>
+                                    <option value="staging">Staging</option>
+                                    <option value="production">Production</option>
+                                    <option value="hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Brief description of the application"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="business_criticality" class="form-label">Business Criticality <span class="text-danger">*</span></label>
+                                <select class="form-select" id="business_criticality" name="business_criticality" required>
+                                    <option value="">Choose...</option>
+                                    <option value="Critical">Critical</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_classification" class="form-label">Data Classification *</label>
+                                <select class="form-control" id="data_classification" name="data_classification" required>
+                                    <option value="">Select Classification</option>
+                                    <option value="Public">Public</option>
+                                    <option value="Internal">Internal</option>
+                                    <option value="Confidential">Confidential</option>
+                                    <option value="Restricted">Restricted</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5><i class="fas fa-file-upload"></i> Architecture & Documentation</h5>
+                            <p class="text-muted">Upload supporting documents for security review (Optional)</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="logical_architecture" class="form-label">Logical Architecture Diagram</label>
+                        <input type="file" class="form-control" id="logical_architecture" name="logical_architecture" 
+                               accept=".pdf,.png,.jpg,.jpeg,.svg,.vsdx,.drawio" 
+                               data-max-size="10485760">
+                        <div class="form-text">
+                            Accepted formats: PDF, PNG, JPG, SVG, Visio (.vsdx), Draw.io (.drawio) - Max 10MB
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="physical_architecture" class="form-label">Physical Architecture Diagram</label>
+                        <input type="file" class="form-control" id="physical_architecture" name="physical_architecture" 
+                               accept=".pdf,.png,.jpg,.jpeg,.svg,.vsdx,.drawio"
+                               data-max-size="10485760">
+                        <div class="form-text">
+                            Accepted formats: PDF, PNG, JPG, SVG, Visio (.vsdx), Draw.io (.drawio) - Max 10MB
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="overview_document" class="form-label">Application Overview Document</label>
+                        <input type="file" class="form-control" id="overview_document" name="overview_document" 
+                               accept=".pdf,.doc,.docx,.txt,.md"
+                               data-max-size="10485760">
+                        <div class="form-text">
+                            Accepted formats: PDF, Word (.doc, .docx), Text (.txt), Markdown (.md) - Max 10MB
+                        </div>
+                    </div>
+
+                    <!-- Cloud Infrastructure Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-cloud me-2"></i>Cloud Infrastructure
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Specify if your application uses cloud services that require additional security review
+                        </p>
+
+                    <div class="mb-3">
+                            <label class="form-label fw-semibold">Cloud Review Required?</label>
+                            <div class="row g-3">
+                            <div class="col-md-6">
+                                    <div class="cloud-option-card">
+                                    <input class="form-check-input" type="radio" name="cloud_review_required" value="yes" id="cloud_yes" onchange="toggleCloudProviders()">
+                                        <label class="cloud-option-label" for="cloud_yes">
+                                            <div class="cloud-option-icon">
+                                                <i class="fas fa-cloud"></i>
+                                            </div>
+                                            <div class="cloud-option-content">
+                                                <div class="cloud-option-title">Yes</div>
+                                                <div class="cloud-option-subtitle">Application uses cloud services</div>
+                                            </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                    <div class="cloud-option-card">
+                                    <input class="form-check-input" type="radio" name="cloud_review_required" value="no" id="cloud_no" onchange="toggleCloudProviders()" checked>
+                                        <label class="cloud-option-label" for="cloud_no">
+                                            <div class="cloud-option-icon">
+                                                <i class="fas fa-server"></i>
+                                            </div>
+                                            <div class="cloud-option-content">
+                                                <div class="cloud-option-title">No</div>
+                                                <div class="cloud-option-subtitle">On-premises or no cloud services</div>
+                                            </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div id="cloudProvidersSection" class="cloud-providers-section" style="display: none;">
+                            <label class="form-label fw-semibold mb-3">Cloud Providers (Select all that apply)</label>
+                            <div class="row g-3">
+                            <div class="col-md-4">
+                                    <div class="provider-card">
+                                    <input class="form-check-input" type="checkbox" name="cloud_providers" value="AWS" id="cloud_aws">
+                                        <label class="provider-label" for="cloud_aws">
+                                            <div class="provider-icon aws-icon">
+                                                <i class="fab fa-aws"></i>
+                                            </div>
+                                            <div class="provider-name">Amazon Web Services (AWS)</div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                    <div class="provider-card">
+                                    <input class="form-check-input" type="checkbox" name="cloud_providers" value="Azure" id="cloud_azure">
+                                        <label class="provider-label" for="cloud_azure">
+                                            <div class="provider-icon azure-icon">
+                                                <i class="fab fa-microsoft"></i>
+                                            </div>
+                                            <div class="provider-name">Microsoft Azure</div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                    <div class="provider-card">
+                                    <input class="form-check-input" type="checkbox" name="cloud_providers" value="GCP" id="cloud_gcp">
+                                        <label class="provider-label" for="cloud_gcp">
+                                            <div class="provider-icon gcp-icon">
+                                                <i class="fab fa-google"></i>
+                                            </div>
+                                            <div class="provider-name">Google Cloud Platform</div>
+                                    </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Database Infrastructure Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-database me-2"></i>Database Infrastructure
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Specify if your application uses databases that require additional security review
+                        </p>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Database Review Required?</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="cloud-option-card">
+                                        <input class="form-check-input" type="radio" name="database_review_required" value="yes" id="database_yes" onchange="toggleDatabaseProviders()">
+                                        <label class="cloud-option-label" for="database_yes">
+                                            <div class="cloud-option-icon">
+                                                <i class="fas fa-database"></i>
+                                            </div>
+                                            <div class="cloud-option-content">
+                                                <div class="cloud-option-title">Yes</div>
+                                                <div class="cloud-option-subtitle">Application uses databases</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="cloud-option-card">
+                                        <input class="form-check-input" type="radio" name="database_review_required" value="no" id="database_no" onchange="toggleDatabaseProviders()" checked>
+                                        <label class="cloud-option-label" for="database_no">
+                                            <div class="cloud-option-icon">
+                                                <i class="fas fa-file"></i>
+                                            </div>
+                                            <div class="cloud-option-content">
+                                                <div class="cloud-option-title">No</div>
+                                                <div class="cloud-option-subtitle">No database or file-based storage</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="databaseProvidersSection" class="cloud-providers-section" style="display: none;">
+                            <label class="form-label fw-semibold mb-3">Database Types (Select all that apply)</label>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="provider-card">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="MongoDB" id="db_mongodb">
+                                        <label class="provider-label" for="db_mongodb">
+                                            <div class="provider-icon mongodb-icon">
+                                                <i class="fas fa-leaf"></i>
+                                            </div>
+                                            <div class="provider-name">MongoDB</div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="provider-card">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="PostgreSQL" id="db_postgresql">
+                                        <label class="provider-label" for="db_postgresql">
+                                            <div class="provider-icon postgresql-icon">
+                                                <i class="fas fa-elephant"></i>
+                                            </div>
+                                            <div class="provider-name">PostgreSQL</div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="provider-card">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="MySQL" id="db_mysql">
+                                        <label class="provider-label" for="db_mysql">
+                                            <div class="provider-icon mysql-icon">
+                                                <i class="fas fa-database"></i>
+                                            </div>
+                                            <div class="provider-name">MySQL</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Technology Stack (Select all that apply)</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="JavaScript" id="tech_js">
+                                    <label class="form-check-label" for="tech_js">JavaScript</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Python" id="tech_python">
+                                    <label class="form-check-label" for="tech_python">Python</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Java" id="tech_java">
+                                    <label class="form-check-label" for="tech_java">Java</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="C#" id="tech_csharp">
+                                    <label class="form-check-label" for="tech_csharp">C#</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="React" id="tech_react">
+                                    <label class="form-check-label" for="tech_react">React</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Angular" id="tech_angular">
+                                    <label class="form-check-label" for="tech_angular">Angular</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Vue.js" id="tech_vue">
+                                    <label class="form-check-label" for="tech_vue">Vue.js</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="PHP" id="tech_php">
+                                    <label class="form-check-label" for="tech_php">PHP</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Node.js" id="tech_node">
+                                    <label class="form-check-label" for="tech_node">Node.js</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value=".NET Core" id="tech_dotnet">
+                                    <label class="form-check-label" for="tech_dotnet">.NET Core</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Ruby" id="tech_ruby">
+                                    <label class="form-check-label" for="tech_ruby">Ruby</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Docker" id="tech_docker">
+                                    <label class="form-check-label" for="tech_docker">Docker</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('web_applications') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Applications
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6><i class="fas fa-info-circle"></i> What happens next?</h6>
+                <ol class="mb-0">
+                    <li>Your application will be registered in the portal</li>
+                    <li>You'll be directed to the security questionnaire</li>
+                    <li>Complete the OWASP-based security assessment</li>
+                    <li>Receive detailed security recommendations</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleCloudProviders() {
+    const cloudYes = document.getElementById('cloud_yes');
+    const cloudProvidersSection = document.getElementById('cloudProvidersSection');
+    
+    if (cloudYes.checked) {
+        cloudProvidersSection.style.display = 'block';
+        // Add smooth animation
+        setTimeout(() => {
+            cloudProvidersSection.style.opacity = '1';
+            cloudProvidersSection.style.transform = 'translateY(0)';
+        }, 10);
+    } else {
+        // Add smooth hide animation
+        cloudProvidersSection.style.opacity = '0';
+        cloudProvidersSection.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+        cloudProvidersSection.style.display = 'none';
+        }, 300);
+        
+        // Uncheck all cloud provider checkboxes when hiding
+        const cloudCheckboxes = document.querySelectorAll('input[name="cloud_providers"]');
+        cloudCheckboxes.forEach(cb => cb.checked = false);
+    }
+}
+
+function toggleDatabaseProviders() {
+    const databaseYes = document.getElementById('database_yes');
+    const databaseProvidersSection = document.getElementById('databaseProvidersSection');
+    
+    if (databaseYes.checked) {
+        databaseProvidersSection.style.display = 'block';
+        // Add smooth animation
+        setTimeout(() => {
+            databaseProvidersSection.style.opacity = '1';
+            databaseProvidersSection.style.transform = 'translateY(0)';
+        }, 10);
+    } else {
+        // Add smooth hide animation
+        databaseProvidersSection.style.opacity = '0';
+        databaseProvidersSection.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+        databaseProvidersSection.style.display = 'none';
+        }, 300);
+        
+        // Uncheck all database provider checkboxes when hiding
+        const databaseCheckboxes = document.querySelectorAll('input[name="database_types"]');
+        databaseCheckboxes.forEach(cb => cb.checked = false);
+    }
+}
+
+// File size validation
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInputs = document.querySelectorAll('input[type="file"][data-max-size]');
+    
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const maxSize = parseInt(this.getAttribute('data-max-size'));
+            const file = this.files[0];
+            
+            if (file && file.size > maxSize) {
+                alert('File size exceeds 10MB limit. Please choose a smaller file.');
+                this.value = '';
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %} 
