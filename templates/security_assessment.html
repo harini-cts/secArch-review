@@ -56,7 +56,7 @@
                             <i class="fas fa-desktop fa-lg me-3"></i>
                             <div>
                                 <h6 class="mb-0">Application Review</h6>
-                                <small>OWASP-based security assessment</small>
+                                <small>ASVS-based security verification</small>
                             </div>
                         </div>
                     </div>
@@ -99,77 +99,54 @@
 
             <!-- Cloud Review Category -->
             {% if cloud_review_required %}
-            <div class="{% if database_review_required %}col-md-4{% else %}col-md-6{% endif %} mb-4">
-                <div class="card h-100 category-card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-cloud"></i> Cloud Review</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">OWASP Cloud Top 10 based security assessment for AWS, Azure, and GCP infrastructure and services.</p>
-                        
-                        <div class="row text-center mb-3">
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">3</span>
-                                    <span class="stat-label">Platforms</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ cloud_review_questions or 24 }}</span>
-                                    <span class="stat-label">Questions</span>
-                                </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-info text-white border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-cloud fa-lg me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Cloud Review</h6>
+                                <small>ASVS-based cloud security verification</small>
                             </div>
                         </div>
-
-                        <div class="cloud-providers mb-3">
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-light text-dark">{{ cloud_review_questions or 24 }} questions</span>
+                            {% if cloud_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
                             <span class="badge bg-warning text-dark me-1">AWS</span>
                             <span class="badge bg-primary me-1">Azure</span>
                             <span class="badge bg-danger">GCP</span>
                         </div>
-
-                        <div class="features-list mb-3">
-                            <small>
-                                <strong>Areas include:</strong><br>
-                                • Identity & Access Management<br>
-                                • Network Security & Configuration<br>
-                                • Data Protection & Encryption<br>
-                                • Cloud-specific vulnerabilities<br>
-                            </small>
-                        </div>
+                        
+                        <p class="text-muted small mb-3">Covers identity management, network security, data protection, and cloud-specific vulnerabilities</p>
 
                         {% if cloud_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
-                                <i class="fas fa-check"></i> Review Completed
+                                <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif cloud_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-eye"></i> View Submitted Answers
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Answers
                             </a>
-                            <small class="text-muted mt-2 d-block text-center">
-                                <i class="fas fa-check-circle"></i> Submitted successfully
-                            </small>
                         {% elif cloud_review_status == 'pending_analyst' %}
                             <button class="btn btn-outline-warning w-100" disabled>
-                                <i class="fas fa-clock"></i> Pending with Security Analyst
+                                <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif cloud_review_status == 'draft' %}
-                            <!-- Continue from where they left off -->
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-success w-100">
-                                <i class="fas fa-play-circle"></i> Continue Cloud Review
-                            </a>
-                            <small class="text-muted mt-2 d-block text-center">
-                                <i class="fas fa-info-circle"></i> Resume from where you left off
-                            </small>
-                        {% elif user_role in ['security_analyst', 'admin'] %}
-                            <!-- Only analysts can start reviews -->
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-info w-100">
-                                <i class="fas fa-play"></i> Start Cloud Review
+                                <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <!-- Regular users start cloud questionnaire -->
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-info w-100">
-                                <i class="fas fa-play"></i> Start Cloud Review
+                                <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
                     </div>
@@ -179,30 +156,28 @@
 
             <!-- Database Review Category -->
             {% if database_review_required %}
-            <div class="{% if cloud_review_required %}col-md-4{% else %}col-md-6{% endif %} mb-4">
-                <div class="card h-100 category-card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-database"></i> Database Review</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">OWASP-based security assessment for database infrastructure covering MongoDB, PostgreSQL, and MySQL security practices.</p>
-                        
-                        <div class="row text-center mb-3">
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ database_types|length }}</span>
-                                    <span class="stat-label">Database Types</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ database_review_questions or 30 }}</span>
-                                    <span class="stat-label">Questions</span>
-                                </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-success text-white border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-database fa-lg me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Database Review</h6>
+                                <small>ASVS-based database security verification</small>
                             </div>
                         </div>
-
-                        <div class="database-types mb-3">
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-light text-dark">{{ database_review_questions or 30 }} questions</span>
+                            {% if database_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
                             {% for db_type in database_types %}
                                 {% if db_type == 'MongoDB' %}
                                     <span class="badge bg-success me-1">MongoDB</span>
@@ -213,39 +188,28 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
-
-                        <div class="features-list mb-3">
-                            <small>
-                                <strong>Areas include:</strong><br>
-                                • Authentication & Access Control<br>
-                                • Network Security & Encryption<br>
-                                • Data Protection & Backup<br>
-                                • Database-specific vulnerabilities<br>
-                            </small>
-                        </div>
+                        
+                        <p class="text-muted small mb-3">Covers authentication, access control, encryption, and database-specific vulnerabilities</p>
 
                         {% if database_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
-                                <i class="fas fa-check"></i> Review Completed
+                                <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif database_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-eye"></i> View Submitted Answers
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Answers
                             </a>
-                            <small class="text-muted mt-2 d-block text-center">
-                                <i class="fas fa-check-circle"></i> Submitted successfully
-                            </small>
                         {% elif database_review_status == 'pending_analyst' %}
-                            <button class="btn btn-outline-info w-100" disabled>
-                                <i class="fas fa-user-tie"></i> Pending Analyst Review
+                            <button class="btn btn-outline-warning w-100" disabled>
+                                <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif database_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-warning w-100">
-                                <i class="fas fa-edit"></i> Continue Database Review
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-success w-100">
+                                <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-success w-100">
-                                <i class="fas fa-play"></i> Start Database Review
+                                <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
                     </div>
@@ -255,64 +219,54 @@
 
             <!-- Infrastructure Review Category -->
             {% if infrastructure_review_required %}
-            <div class="col-md-4 col-lg-2 mb-4">
-                <div class="card h-100 category-card">
-                    <div class="card-header bg-warning text-white">
-                        <h5 class="mb-0"><i class="fas fa-server"></i> Infrastructure Review</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Container and orchestration security assessment for Docker, Kubernetes, and service mesh technologies.</p>
-                        
-                        <div class="row text-center mb-3">
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ container_tech|length }}</span>
-                                    <span class="stat-label">Technologies</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">16</span>
-                                    <span class="stat-label">Questions</span>
-                                </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-warning text-white border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-server fa-lg me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Infrastructure Review</h6>
+                                <small>Container & orchestration security</small>
                             </div>
                         </div>
-
-                        <div class="container-tech mb-3">
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-light text-dark">16 questions</span>
+                            {% if infrastructure_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
                             {% for tech in container_tech %}
                                 <span class="badge bg-secondary me-1">{{ tech }}</span>
                             {% endfor %}
                         </div>
-
-                        <div class="features-list mb-3">
-                            <small>
-                                <strong>Areas include:</strong><br>
-                                • Container Security<br>
-                                • Orchestration Security<br>
-                                • Service Mesh Security<br>
-                                • Infrastructure Monitoring<br>
-                            </small>
-                        </div>
+                        
+                        <p class="text-muted small mb-3">Covers container security, orchestration, service mesh, and monitoring</p>
 
                         {% if infrastructure_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
-                                <i class="fas fa-check"></i> Review Completed
+                                <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif infrastructure_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-eye"></i> View Submitted Answers
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif infrastructure_review_status == 'pending_analyst' %}
                             <button class="btn btn-outline-warning w-100" disabled>
-                                <i class="fas fa-user-tie"></i> Pending Analyst Review
+                                <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif infrastructure_review_status == 'draft' %}
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-warning w-100">
-                                <i class="fas fa-edit"></i> Continue Infrastructure Review
+                                <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-warning w-100">
-                                <i class="fas fa-play"></i> Start Infrastructure Review
+                                <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
                     </div>
@@ -322,44 +276,34 @@
 
             <!-- Compliance Review Category -->
             {% if compliance_review_required %}
-            <div class="col-md-4 col-lg-2 mb-4">
-                <div class="card h-100 category-card">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Compliance Review</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Regulatory compliance assessment for GDPR, HIPAA, PCI DSS, SOC 2, and other industry standards.</p>
-                        
-                        <div class="row text-center mb-3">
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ compliance|length }}</span>
-                                    <span class="stat-label">Standards</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">18</span>
-                                    <span class="stat-label">Questions</span>
-                                </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-danger text-white border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shield-alt fa-lg me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Compliance Review</h6>
+                                <small>ASVS-based compliance verification</small>
                             </div>
                         </div>
-
-                        <div class="compliance-standards mb-3">
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-light text-dark">18 questions</span>
+                            {% if compliance_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
                             {% for comp in compliance %}
                                 <span class="badge bg-danger me-1">{{ comp }}</span>
                             {% endfor %}
                         </div>
-
-                        <div class="features-list mb-3">
-                            <small>
-                                <strong>Areas include:</strong><br>
-                                • Data Protection & Privacy<br>
-                                • Financial Compliance<br>
-                                • Healthcare Compliance<br>
-                                • Security Frameworks<br>
-                            </small>
-                        </div>
+                        
+                        <p class="text-muted small mb-3">Covers data protection, privacy, financial compliance, and industry standards</p>
 
                         {% if compliance_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -389,64 +333,54 @@
 
             <!-- API Review Category -->
             {% if api_review_required %}
-            <div class="col-md-4 col-lg-2 mb-4">
-                <div class="card h-100 category-card">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0"><i class="fas fa-code"></i> API Review</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">API and microservices security assessment covering authentication, authorization, and third-party integrations.</p>
-                        
-                        <div class="row text-center mb-3">
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ auth_services|length }}</span>
-                                    <span class="stat-label">Services</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">16</span>
-                                    <span class="stat-label">Questions</span>
-                                </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-dark text-white border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-code fa-lg me-3"></i>
+                            <div>
+                                <h6 class="mb-0">API Review</h6>
+                                <small>ASVS-based API security verification</small>
                             </div>
                         </div>
-
-                        <div class="api-services mb-3">
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-light text-dark">16 questions</span>
+                            {% if api_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
                             {% for auth in auth_services %}
                                 <span class="badge bg-dark me-1">{{ auth }}</span>
                             {% endfor %}
                         </div>
-
-                        <div class="features-list mb-3">
-                            <small>
-                                <strong>Areas include:</strong><br>
-                                • API Authentication & Authorization<br>
-                                • API Security Controls<br>
-                                • API Monitoring & Logging<br>
-                                • Third-Party Integrations<br>
-                            </small>
-                        </div>
+                        
+                        <p class="text-muted small mb-3">Covers API authentication, authorization, security controls, and third-party integrations</p>
 
                         {% if api_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
-                                <i class="fas fa-check"></i> Review Completed
+                                <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif api_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-eye"></i> View Submitted Answers
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif api_review_status == 'pending_analyst' %}
-                            <button class="btn btn-outline-dark w-100" disabled>
-                                <i class="fas fa-user-tie"></i> Pending Analyst Review
+                            <button class="btn btn-outline-warning w-100" disabled>
+                                <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif api_review_status == 'draft' %}
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-dark w-100">
-                                <i class="fas fa-edit"></i> Continue API Review
+                                <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-dark w-100">
-                                <i class="fas fa-play"></i> Start API Review
+                                <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
                     </div>
