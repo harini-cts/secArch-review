@@ -519,7 +519,7 @@ SECURITY_QUESTIONNAIRES = {
                         "id": "input_7",
                         "question": "Is input validation performed using allowlists rather than blocklists?",
                         "description": "Allowlist validation is more secure and prevents bypass techniques",
-                        "type": "radio",
+                        "type": "radio", 
                         "options": ["yes", "na", "no"]
                     }
                 ]
@@ -999,7 +999,7 @@ SECURITY_QUESTIONNAIRES = {
                         "description": "Business logic protection prevents workflow manipulation and unauthorized state changes",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
-                    },
+            },
                     {
                         "id": "business_2",
                         "question": "Is data integrity validation implemented for critical business operations?",
@@ -1799,15 +1799,15 @@ SECURITY_QUESTIONNAIRES = {
         }
     },
 
-    # ===== INFRASTRUCTURE SECURITY REVIEW =====
+    # ===== INFRASTRUCTURE SECURITY REVIEW (Enhanced - 6 Categories) =====
     "infrastructure_review": {
         "name": "Infrastructure Security Review",
-        "description": "Comprehensive security assessment for containerized applications, orchestration platforms, and infrastructure components",
+        "description": "Comprehensive ASVS-based security assessment for containerized applications, orchestration platforms, and infrastructure components",
         "review_type": "infrastructure_review",
         "categories": {
             "container_security": {
-                "title": "Container Security",
-                "description": "Security assessment for containerized applications and container runtime security",
+                "title": "Container Security - ASVS V1.4",
+                "description": "ASVS V1.4 - Security assessment for containerized applications and container runtime security",
                 "questions": [
                     {
                         "id": "container_1",
@@ -1843,12 +1843,33 @@ SECURITY_QUESTIONNAIRES = {
                         "description": "Resource limits prevent DoS attacks through resource exhaustion",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_6",
+                        "question": "Are container images signed and verified before deployment?",
+                        "description": "Image signing ensures container integrity and prevents tampering",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_7",
+                        "question": "Are container runtime security policies enforced (seccomp, AppArmor, SELinux)?",
+                        "description": "Runtime security policies provide additional isolation and protection",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_8",
+                        "question": "Are container networks properly segmented and isolated?",
+                        "description": "Network segmentation prevents lateral movement and unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
                     }
                 ]
             },
             "orchestration_security": {
-                "title": "Orchestration Security",
-                "description": "Security assessment for Kubernetes, Docker Swarm, and other orchestration platforms",
+                "title": "Orchestration Security - ASVS V1.4",
+                "description": "ASVS V1.4 - Security assessment for Kubernetes, Docker Swarm, and other orchestration platforms",
                 "questions": [
                     {
                         "id": "k8s_1",
@@ -1884,6 +1905,27 @@ SECURITY_QUESTIONNAIRES = {
                         "description": "Admission controllers enforce security policies at deployment time",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_6",
+                        "question": "Is Kubernetes API server properly secured and authenticated?",
+                        "description": "API server security prevents unauthorized cluster access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_7",
+                        "question": "Are Kubernetes service accounts properly managed and restricted?",
+                        "description": "Service account security prevents privilege escalation",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_8",
+                        "question": "Is cluster-level logging and monitoring implemented?",
+                        "description": "Cluster monitoring enables security incident detection",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
                     }
                 ]
             },
@@ -1915,8 +1957,8 @@ SECURITY_QUESTIONNAIRES = {
                 ]
             },
             "infrastructure_monitoring": {
-                "title": "Infrastructure Monitoring & Logging",
-                "description": "Security monitoring and logging for infrastructure components",
+                "title": "Infrastructure Monitoring & Logging - ASVS V8.1",
+                "description": "ASVS V8.1 - Security monitoring and logging for infrastructure components",
                 "questions": [
                     {
                         "id": "monitor_1",
@@ -1938,21 +1980,117 @@ SECURITY_QUESTIONNAIRES = {
                         "description": "Infrastructure monitoring enables proactive security and performance management",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "monitor_4",
+                        "question": "Are security alerts configured for critical infrastructure events?",
+                        "description": "Security alerts enable rapid response to infrastructure threats",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "monitor_5",
+                        "question": "Is log integrity protection implemented to prevent tampering?",
+                        "description": "Log integrity ensures audit trail reliability and forensic accuracy",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "network_security": {
+                "title": "Network Security - ASVS V1.4",
+                "description": "ASVS V1.4 - Network security controls for infrastructure components",
+                "questions": [
+                    {
+                        "id": "network_1",
+                        "question": "Are network segmentation and micro-segmentation implemented?",
+                        "description": "Network segmentation prevents lateral movement and limits attack surface",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "network_2",
+                        "question": "Are firewall rules properly configured and regularly reviewed?",
+                        "description": "Firewall rules control network traffic and prevent unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "network_3",
+                        "question": "Is network traffic encrypted in transit (TLS, VPN, IPSec)?",
+                        "description": "Network encryption protects data from interception and tampering",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "network_4",
+                        "question": "Are DDoS protection mechanisms implemented?",
+                        "description": "DDoS protection prevents service disruption and availability attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "network_5",
+                        "question": "Is network monitoring and intrusion detection implemented?",
+                        "description": "Network monitoring enables detection of suspicious activities and attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "infrastructure_hardening": {
+                "title": "Infrastructure Hardening - ASVS V1.4",
+                "description": "ASVS V1.4 - Infrastructure hardening and configuration security",
+                "questions": [
+                    {
+                        "id": "hardening_1",
+                        "question": "Are infrastructure components hardened against known vulnerabilities?",
+                        "description": "Infrastructure hardening reduces attack surface and prevents exploitation",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hardening_2",
+                        "question": "Are unnecessary services and ports disabled on infrastructure components?",
+                        "description": "Service minimization reduces attack surface and potential vulnerabilities",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hardening_3",
+                        "question": "Are infrastructure components regularly patched and updated?",
+                        "description": "Regular patching prevents exploitation of known vulnerabilities",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hardening_4",
+                        "question": "Are default credentials changed and strong authentication enforced?",
+                        "description": "Strong authentication prevents unauthorized access to infrastructure",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hardening_5",
+                        "question": "Are infrastructure configurations regularly audited and validated?",
+                        "description": "Configuration auditing ensures security controls remain effective",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
                     }
                 ]
             }
         }
     },
 
-    # ===== COMPLIANCE REVIEW =====
+    # ===== COMPLIANCE REVIEW (Enhanced - 6 Categories) =====
     "compliance_review": {
         "name": "Compliance Security Review",
-        "description": "Comprehensive security assessment for regulatory compliance and industry standards",
+        "description": "Comprehensive ASVS-based security assessment for regulatory compliance and industry standards",
         "review_type": "compliance_review",
         "categories": {
             "data_protection": {
-                "title": "Data Protection & Privacy",
-                "description": "Data protection controls for GDPR, CCPA, and privacy regulations",
+                "title": "Data Protection & Privacy - ASVS V3.1",
+                "description": "ASVS V3.1 - Data protection controls for GDPR, CCPA, and privacy regulations",
                 "questions": [
                     {
                         "id": "gdpr_1",
@@ -1986,6 +2124,20 @@ SECURITY_QUESTIONNAIRES = {
                         "id": "gdpr_5",
                         "question": "Are data protection impact assessments (DPIA) conducted for high-risk processing?",
                         "description": "GDPR Article 35 - DPIA required for high-risk data processing activities",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "ccpa_1",
+                        "question": "Are California Consumer Privacy Act (CCPA) rights implemented?",
+                        "description": "CCPA requires specific consumer rights for California residents",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "privacy_1",
+                        "question": "Is privacy by design implemented throughout the application?",
+                        "description": "Privacy by design ensures data protection from the ground up",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
@@ -2074,8 +2226,8 @@ SECURITY_QUESTIONNAIRES = {
                 ]
             },
             "security_frameworks": {
-                "title": "Security Frameworks (SOC 2, ISO 27001)",
-                "description": "Security controls for SOC 2 and ISO 27001 compliance",
+                "title": "Security Frameworks (SOC 2, ISO 27001) - ASVS V1.1",
+                "description": "ASVS V1.1 - Security controls for SOC 2 and ISO 27001 compliance",
                 "questions": [
                     {
                         "id": "soc2_1",
@@ -2104,21 +2256,103 @@ SECURITY_QUESTIONNAIRES = {
                         "description": "ISO 27001 A.5.1 - Information security policies must be documented",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "nist_1",
+                        "question": "Is NIST Cybersecurity Framework implemented?",
+                        "description": "NIST CSF provides comprehensive cybersecurity risk management",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "cobit_1",
+                        "question": "Are COBIT governance and control objectives implemented?",
+                        "description": "COBIT provides IT governance and management framework",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "industry_specific": {
+                "title": "Industry-Specific Compliance",
+                "description": "Industry-specific compliance requirements and regulations",
+                "questions": [
+                    {
+                        "id": "energy_1",
+                        "question": "Are energy sector compliance requirements (NERC CIP) implemented?",
+                        "description": "NERC CIP ensures cybersecurity for critical energy infrastructure",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "defense_1",
+                        "question": "Are defense contractor requirements (DFARS, CMMC) implemented?",
+                        "description": "DFARS and CMMC ensure cybersecurity for defense contractors",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "education_1",
+                        "question": "Are education sector privacy requirements (FERPA) implemented?",
+                        "description": "FERPA protects student educational records and privacy",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "government_1",
+                        "question": "Are government security requirements (FedRAMP, FISMA) implemented?",
+                        "description": "FedRAMP and FISMA ensure security for government systems",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "audit_governance": {
+                "title": "Audit & Governance - ASVS V8.1",
+                "description": "ASVS V8.1 - Audit controls and governance for compliance",
+                "questions": [
+                    {
+                        "id": "audit_1",
+                        "question": "Are regular security audits and assessments conducted?",
+                        "description": "Regular audits ensure compliance and identify security gaps",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "audit_2",
+                        "question": "Is audit trail integrity protected and monitored?",
+                        "description": "Audit trail integrity ensures compliance evidence reliability",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "governance_1",
+                        "question": "Is security governance structure established and documented?",
+                        "description": "Security governance ensures accountability and oversight",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "governance_2",
+                        "question": "Are compliance metrics and KPIs tracked and reported?",
+                        "description": "Compliance metrics enable continuous improvement and reporting",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
                     }
                 ]
             }
         }
     },
 
-    # ===== API SECURITY REVIEW =====
+    # ===== API SECURITY REVIEW (Enhanced - 6 Categories) =====
     "api_review": {
         "name": "API Security Review",
-        "description": "Comprehensive security assessment for APIs, microservices, and third-party integrations",
+        "description": "Comprehensive ASVS-based security assessment for APIs, microservices, and third-party integrations",
         "review_type": "api_review",
         "categories": {
             "api_authentication": {
-                "title": "API Authentication & Authorization",
-                "description": "Security controls for API authentication and authorization mechanisms",
+                "title": "API Authentication & Authorization - ASVS V2.1",
+                "description": "ASVS V2.1 - Security controls for API authentication and authorization mechanisms",
                 "questions": [
                     {
                         "id": "api_auth_1",
@@ -2145,6 +2379,20 @@ SECURITY_QUESTIONNAIRES = {
                         "id": "api_auth_4",
                         "question": "Is multi-factor authentication (MFA) required for sensitive API operations?",
                         "description": "MFA adds additional security layer for high-privilege operations",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_auth_5",
+                        "question": "Are API keys and secrets stored securely and encrypted?",
+                        "description": "Secure storage prevents credential exposure and unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_auth_6",
+                        "question": "Is API access logging and monitoring implemented?",
+                        "description": "API access monitoring helps detect unauthorized access and abuse",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
@@ -2226,8 +2474,8 @@ SECURITY_QUESTIONNAIRES = {
                 ]
             },
             "third_party_integrations": {
-                "title": "Third-Party Integrations",
-                "description": "Security controls for third-party API integrations and external services",
+                "title": "Third-Party Integrations - ASVS V1.1",
+                "description": "ASVS V1.1 - Security controls for third-party API integrations and external services",
                 "questions": [
                     {
                         "id": "third_party_1",
@@ -2254,6 +2502,88 @@ SECURITY_QUESTIONNAIRES = {
                         "id": "third_party_4",
                         "question": "Are third-party API calls monitored and logged?",
                         "description": "Third-party monitoring helps detect security issues and compliance violations",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "third_party_5",
+                        "question": "Are third-party API contracts and SLAs documented and monitored?",
+                        "description": "API contracts ensure security requirements are met by third parties",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "third_party_6",
+                        "question": "Is circuit breaker pattern implemented for third-party API calls?",
+                        "description": "Circuit breakers prevent cascading failures and improve resilience",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "api_design_security": {
+                "title": "API Design Security - ASVS V5.1",
+                "description": "ASVS V5.1 - Security controls for API design and implementation",
+                "questions": [
+                    {
+                        "id": "api_design_1",
+                        "question": "Is API versioning implemented to manage security updates?",
+                        "description": "API versioning enables controlled security updates and deprecation",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_design_2",
+                        "question": "Are API endpoints designed with least privilege principles?",
+                        "description": "Least privilege design minimizes attack surface and potential damage",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_design_3",
+                        "question": "Is API documentation secured and access-controlled?",
+                        "description": "Secured documentation prevents information disclosure",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_design_4",
+                        "question": "Are API error messages sanitized to prevent information disclosure?",
+                        "description": "Sanitized error messages prevent system information leakage",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "microservices_security": {
+                "title": "Microservices Security - ASVS V1.4",
+                "description": "ASVS V1.4 - Security controls for microservices architecture",
+                "questions": [
+                    {
+                        "id": "microservices_1",
+                        "question": "Is service-to-service authentication implemented (mTLS, JWT)?",
+                        "description": "Service authentication prevents unauthorized inter-service communication",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "microservices_2",
+                        "question": "Are microservices properly isolated and segmented?",
+                        "description": "Service isolation prevents lateral movement and limits blast radius",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "microservices_3",
+                        "question": "Is distributed tracing implemented for security monitoring?",
+                        "description": "Distributed tracing enables security incident investigation",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "microservices_4",
+                        "question": "Are microservices configured with proper resource limits?",
+                        "description": "Resource limits prevent DoS attacks and resource exhaustion",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
