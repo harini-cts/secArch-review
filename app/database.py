@@ -113,7 +113,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS security_reviews (
                 id TEXT PRIMARY KEY,
                 application_id TEXT NOT NULL,
-                field_type TEXT CHECK (field_type IN ('application_review', 'cloud_review', 'mobile_review')),
+                field_type TEXT CHECK (field_type IN ('application_review', 'cloud_review', 'database_review', 'infrastructure_review', 'compliance_review', 'api_review', 'mobile_review')),
                 questionnaire_responses TEXT, -- JSON data
                 additional_comments TEXT CHECK (length(additional_comments) <= 5000),
                 screenshots TEXT, -- JSON array of file paths

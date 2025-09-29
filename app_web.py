@@ -1476,6 +1476,469 @@ SECURITY_QUESTIONNAIRES = {
                 ]
             }
         }
+    },
+
+    # ===== INFRASTRUCTURE SECURITY REVIEW =====
+    "infrastructure_review": {
+        "name": "Infrastructure Security Review",
+        "description": "Comprehensive security assessment for containerized applications, orchestration platforms, and infrastructure components",
+        "review_type": "infrastructure_review",
+        "categories": {
+            "container_security": {
+                "title": "Container Security",
+                "description": "Security assessment for containerized applications and container runtime security",
+                "questions": [
+                    {
+                        "id": "container_1",
+                        "question": "Are container images scanned for vulnerabilities before deployment?",
+                        "description": "Vulnerability scanning prevents deployment of containers with known security issues",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_2",
+                        "question": "Are containers running with non-root users and minimal privileges?",
+                        "description": "Principle of least privilege reduces attack surface and potential damage",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_3",
+                        "question": "Are container images built from minimal base images (distroless/alpine)?",
+                        "description": "Minimal base images reduce attack surface and potential vulnerabilities",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_4",
+                        "question": "Are container secrets managed securely (not hardcoded in images)?",
+                        "description": "Secure secret management prevents credential exposure in container images",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "container_5",
+                        "question": "Are container resource limits configured to prevent resource exhaustion?",
+                        "description": "Resource limits prevent DoS attacks through resource exhaustion",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "orchestration_security": {
+                "title": "Orchestration Security",
+                "description": "Security assessment for Kubernetes, Docker Swarm, and other orchestration platforms",
+                "questions": [
+                    {
+                        "id": "k8s_1",
+                        "question": "Is RBAC (Role-Based Access Control) properly configured in Kubernetes?",
+                        "description": "RBAC ensures users and services have appropriate permissions",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_2",
+                        "question": "Are Kubernetes secrets encrypted at rest and in transit?",
+                        "description": "Secret encryption protects sensitive data from unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_3",
+                        "question": "Are network policies implemented to control pod-to-pod communication?",
+                        "description": "Network policies provide micro-segmentation and reduce lateral movement",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_4",
+                        "question": "Is Pod Security Standards (PSS) or Pod Security Policies (PSP) enforced?",
+                        "description": "Pod security policies prevent privileged containers and enforce security constraints",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "k8s_5",
+                        "question": "Are admission controllers configured for security validation?",
+                        "description": "Admission controllers enforce security policies at deployment time",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "service_mesh_security": {
+                "title": "Service Mesh Security",
+                "description": "Security assessment for Istio, Linkerd, and other service mesh implementations",
+                "questions": [
+                    {
+                        "id": "mesh_1",
+                        "question": "Is mTLS (mutual TLS) enabled for service-to-service communication?",
+                        "description": "mTLS provides end-to-end encryption and authentication between services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "mesh_2",
+                        "question": "Are service mesh policies configured for traffic management and security?",
+                        "description": "Service mesh policies control traffic flow and enforce security rules",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "mesh_3",
+                        "question": "Is observability and monitoring configured for service mesh traffic?",
+                        "description": "Service mesh observability enables security monitoring and incident response",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "infrastructure_monitoring": {
+                "title": "Infrastructure Monitoring & Logging",
+                "description": "Security monitoring and logging for infrastructure components",
+                "questions": [
+                    {
+                        "id": "monitor_1",
+                        "question": "Are infrastructure logs centralized and retained for security analysis?",
+                        "description": "Centralized logging enables security monitoring and forensic analysis",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "monitor_2",
+                        "question": "Are security events and anomalies monitored in real-time?",
+                        "description": "Real-time monitoring enables rapid detection and response to security incidents",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "monitor_3",
+                        "question": "Are infrastructure metrics and health checks configured?",
+                        "description": "Infrastructure monitoring enables proactive security and performance management",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            }
+        }
+    },
+
+    # ===== COMPLIANCE REVIEW =====
+    "compliance_review": {
+        "name": "Compliance Security Review",
+        "description": "Comprehensive security assessment for regulatory compliance and industry standards",
+        "review_type": "compliance_review",
+        "categories": {
+            "data_protection": {
+                "title": "Data Protection & Privacy",
+                "description": "Data protection controls for GDPR, CCPA, and privacy regulations",
+                "questions": [
+                    {
+                        "id": "gdpr_1",
+                        "question": "Is data processing lawful and based on valid consent where required?",
+                        "description": "GDPR Article 6 - Lawfulness of processing requires valid legal basis",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "gdpr_2",
+                        "question": "Are data subjects' rights (access, rectification, erasure) implemented?",
+                        "description": "GDPR Articles 15-17 - Data subjects have specific rights that must be supported",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "gdpr_3",
+                        "question": "Is data minimization principle implemented (collect only necessary data)?",
+                        "description": "GDPR Article 5(1)(c) - Data minimization reduces privacy risks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "gdpr_4",
+                        "question": "Is data retention policy implemented with automatic deletion?",
+                        "description": "GDPR Article 5(1)(e) - Data should not be kept longer than necessary",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "gdpr_5",
+                        "question": "Are data protection impact assessments (DPIA) conducted for high-risk processing?",
+                        "description": "GDPR Article 35 - DPIA required for high-risk data processing activities",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "financial_compliance": {
+                "title": "Financial Compliance (PCI DSS, SOX)",
+                "description": "Security controls for financial data protection and SOX compliance",
+                "questions": [
+                    {
+                        "id": "pci_1",
+                        "question": "Is cardholder data encrypted in transit and at rest?",
+                        "description": "PCI DSS Requirement 3.4 - Protect stored cardholder data with encryption",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "pci_2",
+                        "question": "Are strong access controls implemented for cardholder data access?",
+                        "description": "PCI DSS Requirement 7 - Restrict access to cardholder data by business need-to-know",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "pci_3",
+                        "question": "Is network security implemented to protect cardholder data?",
+                        "description": "PCI DSS Requirement 1 - Install and maintain network security controls",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "sox_1",
+                        "question": "Are financial controls documented and tested regularly?",
+                        "description": "SOX Section 404 - Management assessment of internal controls over financial reporting",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "sox_2",
+                        "question": "Is change management process implemented for financial systems?",
+                        "description": "SOX compliance requires controlled changes to financial systems",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "healthcare_compliance": {
+                "title": "Healthcare Compliance (HIPAA)",
+                "description": "Security controls for healthcare data protection and HIPAA compliance",
+                "questions": [
+                    {
+                        "id": "hipaa_1",
+                        "question": "Are administrative safeguards implemented for PHI protection?",
+                        "description": "HIPAA Security Rule 164.308 - Administrative safeguards for PHI protection",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hipaa_2",
+                        "question": "Are physical safeguards implemented for PHI access control?",
+                        "description": "HIPAA Security Rule 164.310 - Physical safeguards for PHI protection",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hipaa_3",
+                        "question": "Are technical safeguards implemented for PHI security?",
+                        "description": "HIPAA Security Rule 164.312 - Technical safeguards for PHI protection",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hipaa_4",
+                        "question": "Is PHI access logged and monitored for unauthorized access?",
+                        "description": "HIPAA requires audit controls and access monitoring for PHI",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "hipaa_5",
+                        "question": "Are business associate agreements (BAA) in place for third-party vendors?",
+                        "description": "HIPAA requires BAAs for vendors who handle PHI",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "security_frameworks": {
+                "title": "Security Frameworks (SOC 2, ISO 27001)",
+                "description": "Security controls for SOC 2 and ISO 27001 compliance",
+                "questions": [
+                    {
+                        "id": "soc2_1",
+                        "question": "Is security monitoring and incident response process documented?",
+                        "description": "SOC 2 CC6.1 - Logical and physical access security monitoring",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "soc2_2",
+                        "question": "Are system availability and performance monitoring implemented?",
+                        "description": "SOC 2 CC7.1 - System monitoring for availability and performance",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "iso_1",
+                        "question": "Is information security management system (ISMS) implemented?",
+                        "description": "ISO 27001 - Systematic approach to managing sensitive company information",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "iso_2",
+                        "question": "Are security policies and procedures documented and communicated?",
+                        "description": "ISO 27001 A.5.1 - Information security policies must be documented",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            }
+        }
+    },
+
+    # ===== API SECURITY REVIEW =====
+    "api_review": {
+        "name": "API Security Review",
+        "description": "Comprehensive security assessment for APIs, microservices, and third-party integrations",
+        "review_type": "api_review",
+        "categories": {
+            "api_authentication": {
+                "title": "API Authentication & Authorization",
+                "description": "Security controls for API authentication and authorization mechanisms",
+                "questions": [
+                    {
+                        "id": "api_auth_1",
+                        "question": "Is strong authentication implemented for API access (OAuth 2.0, JWT, API keys)?",
+                        "description": "Strong authentication prevents unauthorized API access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_auth_2",
+                        "question": "Is authorization properly implemented with role-based access control?",
+                        "description": "Proper authorization ensures users can only access permitted resources",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_auth_3",
+                        "question": "Are API tokens properly secured and rotated regularly?",
+                        "description": "Token security prevents unauthorized access through compromised credentials",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_auth_4",
+                        "question": "Is multi-factor authentication (MFA) required for sensitive API operations?",
+                        "description": "MFA adds additional security layer for high-privilege operations",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "api_security": {
+                "title": "API Security Controls",
+                "description": "Core security controls for API protection and hardening",
+                "questions": [
+                    {
+                        "id": "api_sec_1",
+                        "question": "Is input validation implemented for all API endpoints?",
+                        "description": "Input validation prevents injection attacks and malformed requests",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_sec_2",
+                        "question": "Is rate limiting implemented to prevent abuse and DoS attacks?",
+                        "description": "Rate limiting prevents API abuse and ensures fair usage",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_sec_3",
+                        "question": "Is HTTPS/TLS encryption enforced for all API communications?",
+                        "description": "Encryption in transit protects data from interception and tampering",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_sec_4",
+                        "question": "Are API endpoints protected against common attacks (OWASP API Top 10)?",
+                        "description": "API-specific security controls prevent common attack vectors",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_sec_5",
+                        "question": "Is API versioning implemented to manage security updates?",
+                        "description": "API versioning enables controlled security updates and deprecation",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "api_monitoring": {
+                "title": "API Monitoring & Logging",
+                "description": "Security monitoring and logging for API activities and threats",
+                "questions": [
+                    {
+                        "id": "api_mon_1",
+                        "question": "Are API requests and responses logged for security analysis?",
+                        "description": "API logging enables security monitoring and forensic analysis",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_mon_2",
+                        "question": "Is API usage monitoring implemented to detect anomalies?",
+                        "description": "Usage monitoring helps detect suspicious activities and attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_mon_3",
+                        "question": "Are API errors and exceptions logged securely?",
+                        "description": "Error logging helps identify security issues and system problems",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "api_mon_4",
+                        "question": "Is API performance monitoring implemented?",
+                        "description": "Performance monitoring helps detect DoS attacks and system issues",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "third_party_integrations": {
+                "title": "Third-Party Integrations",
+                "description": "Security controls for third-party API integrations and external services",
+                "questions": [
+                    {
+                        "id": "third_party_1",
+                        "question": "Are third-party API integrations authenticated and authorized?",
+                        "description": "Third-party authentication prevents unauthorized access to external services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "third_party_2",
+                        "question": "Are third-party API credentials stored securely?",
+                        "description": "Secure credential storage prevents unauthorized access to external services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "third_party_3",
+                        "question": "Is data validation implemented for third-party API responses?",
+                        "description": "Response validation prevents malicious data from external services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "third_party_4",
+                        "question": "Are third-party API calls monitored and logged?",
+                        "description": "Third-party monitoring helps detect security issues and compliance violations",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            }
+        }
     }
 }
 
@@ -1489,6 +1952,10 @@ def get_questionnaire_for_field(field):
     field_mapping = {
         'application_review': 'application_review',
         'cloud_review': 'cloud_review',
+        'database_review': 'database_review',
+        'infrastructure_review': 'infrastructure_review',
+        'compliance_review': 'compliance_review',
+        'api_review': 'api_review',
         # Legacy field mappings for backward compatibility
         'comprehensive_application': 'application_review',
         'cloud_aws': 'cloud_review',
