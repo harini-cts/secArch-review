@@ -1978,13 +1978,25 @@ def determine_required_reviews(application_data):
     Enhanced function to determine which security reviews are required based on comprehensive application data
     """
     required_reviews = {
-        'application_review': True,  # Always required
+        'application_review': False,  # Conditional based on application type
         'cloud_review': False,
         'database_review': False,
         'infrastructure_review': False,
         'compliance_review': False,
         'api_review': False
     }
+    
+    # Application Review Requirements - Required for most application types
+    application_indicators = [
+        application_data.get('application_type') in ['web_app', 'web_application', 'mobile_app', 'desktop_app'],
+        'api_service' in (application_data.get('application_type') or '').lower(),
+        'microservice' in (application_data.get('application_type') or '').lower(),
+        bool(application_data.get('frontend_tech')),
+        bool(application_data.get('backend_tech')),
+        application_data.get('business_criticality') in ['Critical', 'High'],
+        application_data.get('deployment_environment') in ['production', 'staging']
+    ]
+    required_reviews['application_review'] = any(application_indicators)
     
     # Cloud Review Requirements
     cloud_indicators = [
@@ -2061,7 +2073,7 @@ def determine_required_reviews(application_data):
     
     # Compliance Review Requirements
     compliance_indicators = [
-        bool(application_data.get('compliance')),
+        bool(application_data.get('compliance')) and application_data.get('compliance') not in ['None', '', 'null'],
         'SOC 2' in (application_data.get('compliance') or ''),
         'ISO 27001' in (application_data.get('compliance') or ''),
         'PCI DSS' in (application_data.get('compliance') or ''),
@@ -2891,6 +2903,7 @@ def web_security_assessment(app_id):
     
     # Determine required reviews using the enhanced logic
     required_reviews = determine_required_reviews(dict(app))
+    app_review_required = required_reviews.get('application_review', False)
     infrastructure_review_required = required_reviews.get('infrastructure_review', False)
     compliance_review_required = required_reviews.get('compliance_review', False)
     api_review_required = required_reviews.get('api_review', False)
@@ -2946,6 +2959,7 @@ def web_security_assessment(app_id):
                          infrastructure_review_status=infrastructure_review_status,
                          compliance_review_status=compliance_review_status,
                          api_review_status=api_review_status,
+                         app_review_required=app_review_required,
                          cloud_review_required=cloud_review_required,
                          database_review_required=database_review_required,
                          infrastructure_review_required=infrastructure_review_required,
@@ -5295,7 +5309,7 @@ def admin_edit_application(app_id):
 						flash(f'Invalid file type for {field_name.replace("_", " ").title()}.', 'error')
 						conn.close()
 						return redirect(url_for('admin_edit_application', app_id=app_id))
-		
+
 		# Perform update
 		conn.execute('''
 			UPDATE applications
@@ -5310,7 +5324,7 @@ def admin_edit_application(app_id):
 			WHERE id = ?
 		''', (data['name'], data['description'], data['technology_stack'],
 			  data['deployment_environment'], data['business_criticality'], data['data_classification'],
-			  data['cloud_review_required'], data['cloud_providers'],
+			data['cloud_review_required'], data['cloud_providers'],
 			  file_paths['logical_architecture_file'], file_paths['physical_architecture_file'], file_paths['overview_document_file'],
 			  data['application_type'], data['frontend_tech'], data['backend_tech'], data['backend_frameworks'],
 			  data['container_tech'], data['data_types'], data['compliance'], data['risk_tolerance'], data['business_impact'],
@@ -5322,7 +5336,7 @@ def admin_edit_application(app_id):
 		conn.close()
 		flash('Application updated successfully!', 'success')
 		return redirect(url_for('admin_applications'))
-	
+
 	# GET: show form with existing values
 	conn.close()
 	return render_template('edit_application.html', application=application)

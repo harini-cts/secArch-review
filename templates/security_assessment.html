@@ -27,14 +27,14 @@
                                 <p class="text-muted mb-0">Complete the required security assessments for your application</p>
                             </div>
                             <div class="col-md-4 text-end">
-                                {% set total_reviews = 6 %}
+                                {% set total_reviews = 0 %}
                                 {% set completed_reviews = 0 %}
-                                {% if app_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
-                                {% if cloud_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
-                                {% if database_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
-                                {% if infrastructure_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
-                                {% if compliance_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
-                                {% if api_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
+                                {% if app_review_required %}{% set total_reviews = total_reviews + 1 %}{% if app_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if cloud_review_required %}{% set total_reviews = total_reviews + 1 %}{% if cloud_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if database_review_required %}{% set total_reviews = total_reviews + 1 %}{% if database_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if infrastructure_review_required %}{% set total_reviews = total_reviews + 1 %}{% if infrastructure_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if compliance_review_required %}{% set total_reviews = total_reviews + 1 %}{% if compliance_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if api_review_required %}{% set total_reviews = total_reviews + 1 %}{% if api_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
                                 <div class="progress mt-2" style="height: 8px;">
                                     <div class="progress-bar bg-success" style="width: {{ (completed_reviews / total_reviews * 100) if total_reviews > 0 else 0 }}%"></div>
                                 </div>
@@ -49,6 +49,7 @@
         <!-- Security Assessment Categories -->
         <div class="row">
             <!-- Application Review Category -->
+            {% if app_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-header bg-primary text-white border-0">
@@ -63,10 +64,14 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="badge bg-light text-dark">{{ app_review_questions or 70 }} questions</span>
-                            <span class="badge bg-warning">Always Required</span>
+                            {% if app_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
                         </div>
                         
-                        <p class="text-muted small mb-3"><strong>Always required:</strong> Core application security assessment for all applications</p>
+                        <p class="text-muted small mb-3"><strong>Required because:</strong> Application type ({{ application.application_type }}) or technology stack requires security assessment</p>
 
                         {% if app_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -92,6 +97,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Cloud Review Category -->
             {% if cloud_review_required %}
@@ -276,6 +282,7 @@
             {% endif %}
 
             <!-- Infrastructure Review Category -->
+            {% if infrastructure_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-header bg-warning text-white border-0">
@@ -337,8 +344,10 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Compliance Review Category -->
+            {% if compliance_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-header bg-danger text-white border-0">
@@ -400,8 +409,10 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- API Review Category -->
+            {% if api_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
                     <div class="card-header bg-dark text-white border-0">
@@ -463,6 +474,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
         </div>
 
