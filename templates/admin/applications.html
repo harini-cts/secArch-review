@@ -110,6 +110,11 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             
+                                            <!-- Edit Button -->
+                                            <a href="{{ url_for('admin_edit_application', app_id=app.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
                                             <!-- Delete Button -->
                                             <form method="POST" action="{{ url_for('admin_delete_application', app_id=app.id) }}" style="display: inline;">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" 

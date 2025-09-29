@@ -2791,9 +2791,15 @@ def web_security_assessment(app_id):
     app_review_completed = False
     cloud_review_completed = False
     database_review_completed = False
+    infrastructure_review_completed = False
+    compliance_review_completed = False
+    api_review_completed = False
     app_review_status = 'not_started'
     cloud_review_status = 'not_started'
     database_review_status = 'not_started'
+    infrastructure_review_status = 'not_started'
+    compliance_review_status = 'not_started'
+    api_review_status = 'not_started'
     
     # Check for existing reviews - get the latest status for each field_type
     existing_reviews = conn.execute('''
@@ -2840,6 +2846,36 @@ def web_security_assessment(app_id):
                 database_review_status = 'pending_analyst'
             elif review['status'] == 'draft' and database_review_status == 'not_started':
                 database_review_status = 'draft'
+        elif review['field_type'] == 'infrastructure_review':
+            if review['status'] == 'completed':
+                infrastructure_review_completed = True
+                infrastructure_review_status = 'completed'
+            elif review['status'] == 'submitted' and infrastructure_review_status not in ['completed']:
+                infrastructure_review_status = 'submitted'
+            elif review['status'] == 'in_review' and infrastructure_review_status not in ['completed', 'submitted']:
+                infrastructure_review_status = 'pending_analyst'
+            elif review['status'] == 'draft' and infrastructure_review_status == 'not_started':
+                infrastructure_review_status = 'draft'
+        elif review['field_type'] == 'compliance_review':
+            if review['status'] == 'completed':
+                compliance_review_completed = True
+                compliance_review_status = 'completed'
+            elif review['status'] == 'submitted' and compliance_review_status not in ['completed']:
+                compliance_review_status = 'submitted'
+            elif review['status'] == 'in_review' and compliance_review_status not in ['completed', 'submitted']:
+                compliance_review_status = 'pending_analyst'
+            elif review['status'] == 'draft' and compliance_review_status == 'not_started':
+                compliance_review_status = 'draft'
+        elif review['field_type'] == 'api_review':
+            if review['status'] == 'completed':
+                api_review_completed = True
+                api_review_status = 'completed'
+            elif review['status'] == 'submitted' and api_review_status not in ['completed']:
+                api_review_status = 'submitted'
+            elif review['status'] == 'in_review' and api_review_status not in ['completed', 'submitted']:
+                api_review_status = 'pending_analyst'
+            elif review['status'] == 'draft' and api_review_status == 'not_started':
+                api_review_status = 'draft'
     
     conn.close()
     
@@ -2852,6 +2888,22 @@ def web_security_assessment(app_id):
     database_review_required = (app['database_review_required'] if 'database_review_required' in app.keys() else 'no') == 'yes'
     database_types_str = app['database_types'] if 'database_types' in app.keys() and app['database_types'] else ''
     database_types = database_types_str.split(', ') if database_types_str else []
+    
+    # Determine required reviews using the enhanced logic
+    required_reviews = determine_required_reviews(dict(app))
+    infrastructure_review_required = required_reviews.get('infrastructure_review', False)
+    compliance_review_required = required_reviews.get('compliance_review', False)
+    api_review_required = required_reviews.get('api_review', False)
+    
+    # Get additional data for new review types
+    container_tech_str = app['container_tech'] if 'container_tech' in app.keys() and app['container_tech'] else ''
+    container_tech = container_tech_str.split(', ') if container_tech_str else []
+    
+    compliance_str = app['compliance'] if 'compliance' in app.keys() and app['compliance'] else ''
+    compliance = compliance_str.split(', ') if compliance_str else []
+    
+    auth_services_str = app['auth_services'] if 'auth_services' in app.keys() and app['auth_services'] else ''
+    auth_services = auth_services_str.split(', ') if auth_services_str else []
     
 
     
@@ -2885,13 +2937,25 @@ def web_security_assessment(app_id):
                          app_review_completed=app_review_completed,
                          cloud_review_completed=cloud_review_completed,
                          database_review_completed=database_review_completed,
+                         infrastructure_review_completed=infrastructure_review_completed,
+                         compliance_review_completed=compliance_review_completed,
+                         api_review_completed=api_review_completed,
                          app_review_status=app_review_status,
                          cloud_review_status=cloud_review_status,
                          database_review_status=database_review_status,
+                         infrastructure_review_status=infrastructure_review_status,
+                         compliance_review_status=compliance_review_status,
+                         api_review_status=api_review_status,
                          cloud_review_required=cloud_review_required,
                          database_review_required=database_review_required,
+                         infrastructure_review_required=infrastructure_review_required,
+                         compliance_review_required=compliance_review_required,
+                         api_review_required=api_review_required,
                          cloud_providers=cloud_providers,
                          database_types=database_types,
+                         container_tech=container_tech,
+                         compliance=compliance,
+                         auth_services=auth_services,
                          user_role=user_role,
                          app_review_questions=app_review_questions,
                          cloud_review_questions=cloud_review_questions,
@@ -5157,82 +5221,108 @@ def edit_application(app_id):
 		flash('Editing is only allowed while the application is in Draft or Rejected state.', 'warning')
 		return redirect(url_for('web_applications'))
 
+@app.route('/admin/edit-application/<app_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_application(app_id):
+	"""Admin edit application - allows admins to edit any application."""
+	conn = get_db()
+	# Check if user is admin
+	user = conn.execute('SELECT role FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+	if not user or user['role'] != 'admin':
+		conn.close()
+		flash('Access denied. Admin privileges required.', 'error')
+		return redirect(url_for('web_applications'))
+	
+	application = conn.execute('SELECT * FROM applications WHERE id = ?', (app_id,)).fetchone()
+	if not application:
+		conn.close()
+		flash('Application not found.', 'error')
+		return redirect(url_for('admin_applications'))
+	
+	# Use the same logic as the regular edit_application but without author restriction
 	if request.method == 'POST':
 		# Extract form data
 		data = {
 			'name': request.form.get('name', application['name']),
 			'description': request.form.get('description', application['description']),
-			'technology_stack': ', '.join(request.form.getlist('technology_stack')),
 			'deployment_environment': request.form.get('deployment_environment', application['deployment_environment']),
 			'business_criticality': request.form.get('business_criticality', application['business_criticality']),
 			'data_classification': request.form.get('data_classification', application['data_classification']),
-			'cloud_review_required': request.form.get('cloud_review_required', application['cloud_review_required'] or 'no'),
-			'cloud_providers': ', '.join(request.form.getlist('cloud_providers')),
-			'database_review_required': request.form.get('database_review_required', application['database_review_required'] or 'no'),
-			'database_types': ', '.join(request.form.getlist('database_types'))
+			'technology_stack': request.form.get('technology_stack', application['technology_stack']),
+			'cloud_review_required': request.form.get('cloud_review_required', application['cloud_review_required']),
+			'cloud_providers': request.form.get('cloud_providers', application['cloud_providers']),
+			# Add all the new enhanced fields
+			'application_type': request.form.get('application_type', application.get('application_type', '')),
+			'frontend_tech': ', '.join(request.form.getlist('frontend_tech')),
+			'backend_tech': ', '.join(request.form.getlist('backend_tech')),
+			'backend_frameworks': ', '.join(request.form.getlist('backend_frameworks')),
+			'container_tech': ', '.join(request.form.getlist('container_tech')),
+			'data_types': ', '.join(request.form.getlist('data_types')),
+			'compliance': ', '.join(request.form.getlist('compliance')),
+			'risk_tolerance': request.form.get('risk_tolerance', application.get('risk_tolerance', '')),
+			'business_impact': request.form.get('business_impact', application.get('business_impact', '')),
+			'auth_services': ', '.join(request.form.getlist('auth_services')),
+			'payment_services': ', '.join(request.form.getlist('payment_services')),
+			'comm_services': ', '.join(request.form.getlist('comm_services')),
+			'analytics_services': ', '.join(request.form.getlist('analytics_services')),
+			'cloud_platforms': ', '.join(request.form.getlist('cloud_platforms')),
+			'cloud_services': ', '.join(request.form.getlist('cloud_services')),
+			'database_types': ', '.join(request.form.getlist('database_types')),
+			'nosql_databases': ', '.join(request.form.getlist('nosql_databases')),
+			'storage_tech': ', '.join(request.form.getlist('storage_tech'))
 		}
-
-		# If no new multi-select values are provided, keep existing values
-		if not data['technology_stack']:
-			data['technology_stack'] = application['technology_stack'] or ''
-		if not data['cloud_providers']:
-			data['cloud_providers'] = application['cloud_providers'] or ''
-		if not data['database_types']:
-			data['database_types'] = application['database_types'] or ''
-
-		# Validate required fields
-		if not all([data['name'], data['business_criticality'], data['data_classification']]):
-			flash('Please fill in all required fields.', 'error')
-			conn.close()
-			return redirect(url_for('edit_application', app_id=app_id))
-
+		
 		# Handle optional file uploads; if not provided, keep existing
 		file_paths = {
 			'logical_architecture_file': application['logical_architecture_file'],
 			'physical_architecture_file': application['physical_architecture_file'],
 			'overview_document_file': application['overview_document_file']
 		}
-		file_fields = {
-			'logical_architecture': 'architecture',
-			'physical_architecture': 'architecture',
-			'overview_document': 'document'
-		}
-		for field_name, file_type in file_fields.items():
+		
+		# Process file uploads
+		for field_name in ['logical_architecture_file', 'physical_architecture_file', 'overview_document_file']:
 			if field_name in request.files:
 				file = request.files[field_name]
-				if file and getattr(file, 'filename', ''):
-					path = secure_upload(file, file_type, session['user_id'], app_id)
-					if path:
-						file_paths[f"{field_name}_file"] = path
+				if file and file.filename:
+					# Validate file type
+					allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx'}
+					if '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in [ext[1:] for ext in allowed_extensions]:
+						filename = secure_filename(file.filename)
+						file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+						file.save(file_path)
+						file_paths[field_name] = file_path
 					else:
 						flash(f'Invalid file type for {field_name.replace("_", " ").title()}.', 'error')
 						conn.close()
-						return redirect(url_for('edit_application', app_id=app_id))
-
+						return redirect(url_for('admin_edit_application', app_id=app_id))
+		
 		# Perform update
 		conn.execute('''
 			UPDATE applications
 			SET name = ?, description = ?, technology_stack = ?,
-				deployment_environment = ?, business_criticality = ?,
-				data_classification = ?, logical_architecture_file = ?,
-				physical_architecture_file = ?, overview_document_file = ?,
+				deployment_environment = ?, business_criticality = ?, data_classification = ?,
 				cloud_review_required = ?, cloud_providers = ?,
-				database_review_required = ?, database_types = ?
-			WHERE id = ? AND author_id = ?
-		''', (
-			data['name'], data['description'], data['technology_stack'],
-			data['deployment_environment'], data['business_criticality'],
-			data['data_classification'], file_paths['logical_architecture_file'],
-			file_paths['physical_architecture_file'], file_paths['overview_document_file'],
-			data['cloud_review_required'], data['cloud_providers'],
-			data['database_review_required'], data['database_types'],
-			app_id, session['user_id']
-		))
+				logical_architecture_file = ?, physical_architecture_file = ?, overview_document_file = ?,
+				application_type = ?, frontend_tech = ?, backend_tech = ?, backend_frameworks = ?,
+				container_tech = ?, data_types = ?, compliance = ?, risk_tolerance = ?, business_impact = ?,
+				auth_services = ?, payment_services = ?, comm_services = ?, analytics_services = ?,
+				cloud_platforms = ?, cloud_services = ?, database_types = ?, nosql_databases = ?, storage_tech = ?
+			WHERE id = ?
+		''', (data['name'], data['description'], data['technology_stack'],
+			  data['deployment_environment'], data['business_criticality'], data['data_classification'],
+			  data['cloud_review_required'], data['cloud_providers'],
+			  file_paths['logical_architecture_file'], file_paths['physical_architecture_file'], file_paths['overview_document_file'],
+			  data['application_type'], data['frontend_tech'], data['backend_tech'], data['backend_frameworks'],
+			  data['container_tech'], data['data_types'], data['compliance'], data['risk_tolerance'], data['business_impact'],
+			  data['auth_services'], data['payment_services'], data['comm_services'], data['analytics_services'],
+			  data['cloud_platforms'], data['cloud_services'], data['database_types'], data['nosql_databases'], data['storage_tech'],
+			  app_id))
+		
 		conn.commit()
 		conn.close()
-		flash('Application updated successfully.', 'success')
-		return redirect(url_for('web_applications'))
-
+		flash('Application updated successfully!', 'success')
+		return redirect(url_for('admin_applications'))
+	
 	# GET: show form with existing values
 	conn.close()
 	return render_template('edit_application.html', application=application)

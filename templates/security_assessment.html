@@ -16,150 +16,81 @@
             <p class="mb-0">{{ application.description }}</p>
         </div>
 
-        <!-- Progress Overview -->
+        <!-- Simplified Progress Overview -->
         <div class="row mb-4">
-            <div class="{% if cloud_review_required and database_review_required %}col-md-4{% elif cloud_review_required or database_review_required %}col-md-6{% else %}col-md-12{% endif %}">
-                <div class="card">
-                    <div class="card-body text-center">
-                        {% if app_review_completed %}
-                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5>Application Review</h5>
-                            <span class="badge bg-success">Completed</span>
-                        {% else %}
-                            <i class="fas fa-clock fa-3x text-warning mb-3"></i>
-                            <h5>Application Review</h5>
-                            <span class="badge bg-warning">Pending</span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% if cloud_review_required %}
-            <div class="{% if database_review_required %}col-md-4{% else %}col-md-6{% endif %}">
-                <div class="card">
-                    <div class="card-body text-center">
-                        {% if cloud_review_completed %}
-                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5>Cloud Review</h5>
-                            <span class="badge bg-success">Completed</span>
-                        {% else %}
-                            <i class="fas fa-cloud fa-3x text-info mb-3"></i>
-                            <h5>Cloud Review</h5>
-                            <span class="badge bg-info">Required</span>
-                            {% if cloud_providers %}
-                            <div class="mt-2">
-                                {% for provider in cloud_providers %}
-                                {% if provider %}
-                                <span class="badge bg-secondary me-1">{{ provider }}</span>
-                                {% endif %}
-                                {% endfor %}
+            <div class="col-12">
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-2"><i class="fas fa-tasks text-primary me-2"></i>Security Review Progress</h5>
+                                <p class="text-muted mb-0">Complete the required security assessments for your application</p>
                             </div>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            {% if database_review_required %}
-            <div class="{% if cloud_review_required %}col-md-4{% else %}col-md-6{% endif %}">
-                <div class="card">
-                    <div class="card-body text-center">
-                        {% if database_review_completed %}
-                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5>Database Review</h5>
-                            <span class="badge bg-success">Completed</span>
-                        {% else %}
-                            <i class="fas fa-database fa-3x text-success mb-3"></i>
-                            <h5>Database Review</h5>
-                            <span class="badge bg-success">Required</span>
-                            {% if database_types %}
-                            <div class="mt-2">
-                                {% for db_type in database_types %}
-                                {% if db_type == 'MongoDB' %}
-                                <span class="badge bg-success me-1">MongoDB</span>
-                                {% elif db_type == 'PostgreSQL' %}
-                                <span class="badge bg-primary me-1">PostgreSQL</span>
-                                {% elif db_type == 'MySQL' %}
-                                <span class="badge bg-warning text-dark me-1">MySQL</span>
-                                {% endif %}
-                                {% endfor %}
+                            <div class="col-md-4 text-end">
+                                {% set total_reviews = 1 %}
+                                {% set completed_reviews = 0 %}
+                                {% if app_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}
+                                {% if cloud_review_required %}{% set total_reviews = total_reviews + 1 %}{% if cloud_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if database_review_required %}{% set total_reviews = total_reviews + 1 %}{% if database_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if infrastructure_review_required %}{% set total_reviews = total_reviews + 1 %}{% if infrastructure_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if compliance_review_required %}{% set total_reviews = total_reviews + 1 %}{% if compliance_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                {% if api_review_required %}{% set total_reviews = total_reviews + 1 %}{% if api_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
+                                <div class="progress mt-2" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: {{ (completed_reviews / total_reviews * 100) if total_reviews > 0 else 0 }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ completed_reviews }}/{{ total_reviews }} reviews completed</small>
                             </div>
-                            {% endif %}
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-            {% endif %}
         </div>
 
         <!-- Security Assessment Categories -->
         <div class="row">
             <!-- Application Review Category -->
-            <div class="{% if cloud_review_required and database_review_required %}col-md-4{% elif cloud_review_required or database_review_required %}col-md-6{% else %}col-md-8 offset-md-2{% endif %} mb-4">
-                <div class="card h-100 category-card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-desktop"></i> Application Review</h5>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-desktop fa-lg me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Application Review</h6>
+                                <small>OWASP-based security assessment</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <p class="card-text">Comprehensive OWASP-based security assessment covering 14 security categories for application development.</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-light text-dark">{{ app_review_questions or 70 }} questions</span>
+                            {% if app_review_completed %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Required</span>
+                            {% endif %}
+                        </div>
                         
-                        <div class="row text-center mb-3">
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">14</span>
-                                    <span class="stat-label">Categories</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="feature-stat">
-                                    <span class="stat-number">{{ app_review_questions or 70 }}</span>
-                                    <span class="stat-label">Questions</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="features-list mb-3">
-                            <small>
-                                <strong>Categories include:</strong><br>
-                                • Authentication & Authorization<br>
-                                • Input Validation & Injection Prevention<br>
-                                • Cryptography & Data Protection<br>
-                                • API Security & Integration<br>
-                                • And 10 more security areas...
-                            </small>
-                        </div>
+                        <p class="text-muted small mb-3">Covers authentication, input validation, cryptography, and API security</p>
 
                         {% if app_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
-                                <i class="fas fa-check"></i> Review Completed
+                                <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif app_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-eye"></i> View Submitted Answers
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Answers
                             </a>
-                            <small class="text-muted mt-2 d-block text-center">
-                                <i class="fas fa-check-circle"></i> Submitted successfully
-                            </small>
                         {% elif app_review_status == 'pending_analyst' %}
                             <button class="btn btn-outline-warning w-100" disabled>
-                                <i class="fas fa-clock"></i> Pending with Security Analyst
+                                <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif app_review_status == 'draft' %}
-                            <!-- Continue from where they left off -->
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-success w-100">
-                                <i class="fas fa-play-circle"></i> Continue Application Review
-                            </a>
-                            <small class="text-muted mt-2 d-block text-center">
-                                <i class="fas fa-info-circle"></i> Resume from where you left off
-                            </small>
-                        {% elif user_role in ['security_analyst', 'admin'] %}
-                            <!-- Only analysts can start reviews -->
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-primary w-100">
-                                <i class="fas fa-play"></i> Start Application Review
+                                <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <!-- Regular users start questionnaire -->
                             <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-primary w-100">
-                                <i class="fas fa-play"></i> Start Application Review
+                                <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
                     </div>
@@ -322,41 +253,241 @@
             </div>
             {% endif %}
 
+            <!-- Infrastructure Review Category -->
+            {% if infrastructure_review_required %}
+            <div class="col-md-4 col-lg-2 mb-4">
+                <div class="card h-100 category-card">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="fas fa-server"></i> Infrastructure Review</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Container and orchestration security assessment for Docker, Kubernetes, and service mesh technologies.</p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="feature-stat">
+                                    <span class="stat-number">{{ container_tech|length }}</span>
+                                    <span class="stat-label">Technologies</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="feature-stat">
+                                    <span class="stat-number">16</span>
+                                    <span class="stat-label">Questions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container-tech mb-3">
+                            {% for tech in container_tech %}
+                                <span class="badge bg-secondary me-1">{{ tech }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="features-list mb-3">
+                            <small>
+                                <strong>Areas include:</strong><br>
+                                • Container Security<br>
+                                • Orchestration Security<br>
+                                • Service Mesh Security<br>
+                                • Infrastructure Monitoring<br>
+                            </small>
+                        </div>
+
+                        {% if infrastructure_review_status == 'completed' %}
+                            <button class="btn btn-outline-success w-100" disabled>
+                                <i class="fas fa-check"></i> Review Completed
+                            </button>
+                        {% elif infrastructure_review_status == 'submitted' %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-eye"></i> View Submitted Answers
+                            </a>
+                        {% elif infrastructure_review_status == 'pending_analyst' %}
+                            <button class="btn btn-outline-warning w-100" disabled>
+                                <i class="fas fa-user-tie"></i> Pending Analyst Review
+                            </button>
+                        {% elif infrastructure_review_status == 'draft' %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-warning w-100">
+                                <i class="fas fa-edit"></i> Continue Infrastructure Review
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-warning w-100">
+                                <i class="fas fa-play"></i> Start Infrastructure Review
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Compliance Review Category -->
+            {% if compliance_review_required %}
+            <div class="col-md-4 col-lg-2 mb-4">
+                <div class="card h-100 category-card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Compliance Review</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Regulatory compliance assessment for GDPR, HIPAA, PCI DSS, SOC 2, and other industry standards.</p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="feature-stat">
+                                    <span class="stat-number">{{ compliance|length }}</span>
+                                    <span class="stat-label">Standards</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="feature-stat">
+                                    <span class="stat-number">18</span>
+                                    <span class="stat-label">Questions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="compliance-standards mb-3">
+                            {% for comp in compliance %}
+                                <span class="badge bg-danger me-1">{{ comp }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="features-list mb-3">
+                            <small>
+                                <strong>Areas include:</strong><br>
+                                • Data Protection & Privacy<br>
+                                • Financial Compliance<br>
+                                • Healthcare Compliance<br>
+                                • Security Frameworks<br>
+                            </small>
+                        </div>
+
+                        {% if compliance_review_status == 'completed' %}
+                            <button class="btn btn-outline-success w-100" disabled>
+                                <i class="fas fa-check"></i> Review Completed
+                            </button>
+                        {% elif compliance_review_status == 'submitted' %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-eye"></i> View Submitted Answers
+                            </a>
+                        {% elif compliance_review_status == 'pending_analyst' %}
+                            <button class="btn btn-outline-danger w-100" disabled>
+                                <i class="fas fa-user-tie"></i> Pending Analyst Review
+                            </button>
+                        {% elif compliance_review_status == 'draft' %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn btn-danger w-100">
+                                <i class="fas fa-edit"></i> Continue Compliance Review
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn btn-danger w-100">
+                                <i class="fas fa-play"></i> Start Compliance Review
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- API Review Category -->
+            {% if api_review_required %}
+            <div class="col-md-4 col-lg-2 mb-4">
+                <div class="card h-100 category-card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-code"></i> API Review</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">API and microservices security assessment covering authentication, authorization, and third-party integrations.</p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="feature-stat">
+                                    <span class="stat-number">{{ auth_services|length }}</span>
+                                    <span class="stat-label">Services</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="feature-stat">
+                                    <span class="stat-number">16</span>
+                                    <span class="stat-label">Questions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-services mb-3">
+                            {% for auth in auth_services %}
+                                <span class="badge bg-dark me-1">{{ auth }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="features-list mb-3">
+                            <small>
+                                <strong>Areas include:</strong><br>
+                                • API Authentication & Authorization<br>
+                                • API Security Controls<br>
+                                • API Monitoring & Logging<br>
+                                • Third-Party Integrations<br>
+                            </small>
+                        </div>
+
+                        {% if api_review_status == 'completed' %}
+                            <button class="btn btn-outline-success w-100" disabled>
+                                <i class="fas fa-check"></i> Review Completed
+                            </button>
+                        {% elif api_review_status == 'submitted' %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-eye"></i> View Submitted Answers
+                            </a>
+                        {% elif api_review_status == 'pending_analyst' %}
+                            <button class="btn btn-outline-dark w-100" disabled>
+                                <i class="fas fa-user-tie"></i> Pending Analyst Review
+                            </button>
+                        {% elif api_review_status == 'draft' %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-dark w-100">
+                                <i class="fas fa-edit"></i> Continue API Review
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-dark w-100">
+                                <i class="fas fa-play"></i> Start API Review
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
         </div>
 
         <!-- Submit Section -->
-        {% if app_review_status == 'completed' and (not cloud_review_required or cloud_review_status == 'completed') and (not database_review_required or database_review_status == 'completed') %}
+        {% if app_review_status == 'completed' and (not cloud_review_required or cloud_review_status == 'completed') and (not database_review_required or database_review_status == 'completed') and (not infrastructure_review_required or infrastructure_review_status == 'completed') and (not compliance_review_required or compliance_review_status == 'completed') and (not api_review_required or api_review_status == 'completed') %}
         <div class="alert alert-success text-center">
             <h5><i class="fas fa-check-circle"></i> Security Assessment Complete!</h5>
             <p class="mb-3">
-                {% if cloud_review_required and database_review_required %}
-                Application Review, Cloud Review, and Database Review have been completed by our Security Analysts.
-                {% elif cloud_review_required %}
-                Application Review and Cloud Review have been completed by our Security Analysts.
-                {% elif database_review_required %}
-                Application Review and Database Review have been completed by our Security Analysts.
-                {% else %}
-                Application Review has been completed by our Security Analysts.
-                {% endif %}
+                All required security reviews have been completed by our Security Analysts.
+                {% set completed_reviews = [] %}
+                {% if app_review_status == 'completed' %}{{ completed_reviews.append('Application Review') or '' }}{% endif %}
+                {% if cloud_review_required and cloud_review_status == 'completed' %}{{ completed_reviews.append('Cloud Review') or '' }}{% endif %}
+                {% if database_review_required and database_review_status == 'completed' %}{{ completed_reviews.append('Database Review') or '' }}{% endif %}
+                {% if infrastructure_review_required and infrastructure_review_status == 'completed' %}{{ completed_reviews.append('Infrastructure Review') or '' }}{% endif %}
+                {% if compliance_review_required and compliance_review_status == 'completed' %}{{ completed_reviews.append('Compliance Review') or '' }}{% endif %}
+                {% if api_review_required and api_review_status == 'completed' %}{{ completed_reviews.append('API Review') or '' }}{% endif %}
+                {{ completed_reviews|join(', ') }} completed.
             </p>
             <a href="{{ url_for('web_review_results', app_id=application.id) }}" class="btn btn-success btn-lg">
                 <i class="fas fa-chart-line"></i> View Security Report
             </a>
         </div>
-        {% elif app_review_status == 'submitted' and (not cloud_review_required or cloud_review_status == 'submitted') and (not database_review_required or database_review_status == 'submitted') %}
+        {% elif app_review_status == 'submitted' and (not cloud_review_required or cloud_review_status == 'submitted') and (not database_review_required or database_review_status == 'submitted') and (not infrastructure_review_required or infrastructure_review_status == 'submitted') and (not compliance_review_required or compliance_review_status == 'submitted') and (not api_review_required or api_review_status == 'submitted') %}
         <div class="alert alert-info text-center">
             <h5><i class="fas fa-clock"></i> Ready for Security Analysis!</h5>
             <p class="mb-0">
-                {% if cloud_review_required and database_review_required %}
-                Application Review, Cloud Review, and Database Review have been submitted. Security analysts will now review your application and provide detailed findings.
-                {% elif cloud_review_required %}
-                Application Review and Cloud Review have been submitted. Security analysts will now review your application and provide detailed findings.
-                {% elif database_review_required %}
-                Application Review and Database Review have been submitted. Security analysts will now review your application and provide detailed findings.
-                {% else %}
-                Application Review has been submitted. Security analysts will now review your application and provide detailed findings.
-                {% endif %}
+                All required security reviews have been submitted. Security analysts will now review your application and provide detailed findings.
+                {% set submitted_reviews = [] %}
+                {% if app_review_status == 'submitted' %}{{ submitted_reviews.append('Application Review') or '' }}{% endif %}
+                {% if cloud_review_required and cloud_review_status == 'submitted' %}{{ submitted_reviews.append('Cloud Review') or '' }}{% endif %}
+                {% if database_review_required and database_review_status == 'submitted' %}{{ submitted_reviews.append('Database Review') or '' }}{% endif %}
+                {% if infrastructure_review_required and infrastructure_review_status == 'submitted' %}{{ submitted_reviews.append('Infrastructure Review') or '' }}{% endif %}
+                {% if compliance_review_required and compliance_review_status == 'submitted' %}{{ submitted_reviews.append('Compliance Review') or '' }}{% endif %}
+                {% if api_review_required and api_review_status == 'submitted' %}{{ submitted_reviews.append('API Review') or '' }}{% endif %}
+                {{ submitted_reviews|join(', ') }} submitted.
             </p>
         </div>
         {% elif app_review_status == 'pending_analyst' or (cloud_review_required and cloud_review_status == 'pending_analyst') or (database_review_required and database_review_status == 'pending_analyst') %}

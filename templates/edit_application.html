@@ -3,119 +3,1421 @@
 {% block title %}Edit Application - Cognizant SecArch Portal{% endblock %}
 
 {% block content %}
+<style>
+/* Cloud Infrastructure Section Styles */
+.form-section-title {
+    color: #000048;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.form-section-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Cloud Option Cards */
+.cloud-option-card {
+    position: relative;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.cloud-option-card:hover {
+    border-color: #000048;
+    box-shadow: 0 4px 20px rgba(0, 0, 72, 0.1);
+    transform: translateY(-2px);
+}
+
+.cloud-option-card input[type="radio"] {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    transform: scale(1.2);
+}
+
+.cloud-option-card input[type="radio"]:checked + .cloud-option-label {
+    color: #000048;
+}
+
+.cloud-option-card input[type="radio"]:checked ~ .cloud-option-label,
+.cloud-option-card:has(input[type="radio"]:checked) {
+    border-color: #000048;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+}
+
+.cloud-option-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+.cloud-option-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.cloud-option-card:hover .cloud-option-icon,
+.cloud-option-card:has(input[type="radio"]:checked) .cloud-option-icon {
+    background: #000048;
+    color: white;
+}
+
+.cloud-option-content {
+    flex: 1;
+}
+
+.cloud-option-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.cloud-option-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+/* Cloud Providers Section */
+.cloud-providers-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 1px solid #e9ecef;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Provider Cards */
+.provider-card {
+    position: relative;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.25rem;
+    height: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.provider-card:hover {
+    border-color: #000048;
+    box-shadow: 0 6px 25px rgba(0, 0, 72, 0.15);
+    transform: translateY(-3px);
+}
+
+.provider-card input[type="checkbox"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    transform: scale(1.1);
+}
+
+.provider-card input[type="checkbox"]:checked ~ .provider-label,
+.provider-card:has(input[type="checkbox"]:checked) {
+    border-color: #000048;
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+}
+
+.provider-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+.provider-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+}
+
+.aws-icon {
+    background: #ff9900;
+    color: white;
+}
+
+.azure-icon {
+    background: #0078d4;
+    color: white;
+}
+
+.gcp-icon {
+    background: #4285f4;
+    color: white;
+}
+
+/* Database Provider Icons */
+.mongodb-icon {
+    background: #4db33d;
+    color: white;
+}
+
+.postgresql-icon {
+    background: #336791;
+    color: white;
+}
+
+.mysql-icon {
+    background: #f29111;
+    color: white;
+}
+
+.provider-card:hover .provider-icon {
+    transform: scale(1.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.provider-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+
+.provider-card:has(input[type="checkbox"]:checked) .provider-name {
+    color: #000048;
+}
+
+/* Animation for cloud providers section */
+.cloud-providers-section {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
 <div class="row justify-content-center">
-	<div class="col-md-8">
-		<div class="card">
-			<div class="card-header">
-				<h4><i class="fas fa-edit"></i> Edit Application</h4>
-			</div>
-			<div class="card-body">
-				<form method="POST" enctype="multipart/form-data">
-					<div class="row">
-						<div class="col-md-6">
-							<div class="mb-3">
-								<label for="name" class="form-label">Application Name *</label>
-								<input type="text" class="form-control" id="name" name="name" value="{{ application.name }}" required>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="mb-3">
-								<label for="deployment_environment" class="form-label">Deployment Environment *</label>
-								<select class="form-control" id="deployment_environment" name="deployment_environment" required>
-									<option value="development" {{ 'selected' if application.deployment_environment=='development' else '' }}>Development</option>
-									<option value="staging" {{ 'selected' if application.deployment_environment=='staging' else '' }}>Staging</option>
-									<option value="production" {{ 'selected' if application.deployment_environment=='production' else '' }}>Production</option>
-									<option value="hybrid" {{ 'selected' if application.deployment_environment=='hybrid' else '' }}>Hybrid</option>
-								</select>
-							</div>
-						</div>
-					</div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-edit"></i> Edit Application</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="applicationForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Application Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ application.name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="deployment_environment" class="form-label">Deployment Environment *</label>
+                                <select class="form-select" id="deployment_environment" name="deployment_environment" required>
+                                    <option value="">Select Environment</option>
+                                    <option value="development" {{ 'selected' if application.deployment_environment=='development' else '' }}>Development</option>
+                                    <option value="staging" {{ 'selected' if application.deployment_environment=='staging' else '' }}>Staging</option>
+                                    <option value="production" {{ 'selected' if application.deployment_environment=='production' else '' }}>Production</option>
+                                    <option value="hybrid" {{ 'selected' if application.deployment_environment=='hybrid' else '' }}>Hybrid</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-					<div class="mb-3">
-						<label for="description" class="form-label">Description</label>
-						<textarea class="form-control" id="description" name="description" rows="3">{{ application.description or '' }}</textarea>
-					</div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Brief description of the application">{{ application.description or '' }}</textarea>
+                    </div>
 
-					<div class="row">
-						<div class="col-md-6">
-							<div class="mb-3">
-								<label for="business_criticality" class="form-label">Business Criticality *</label>
-								<select class="form-select" id="business_criticality" name="business_criticality" required>
-									{% for opt in ['Critical','High','Medium','Low'] %}
-									<option value="{{ opt }}" {{ 'selected' if application.business_criticality==opt else '' }}>{{ opt }}</option>
-									{% endfor %}
-								</select>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="mb-3">
-								<label for="data_classification" class="form-label">Data Classification *</label>
-								<select class="form-control" id="data_classification" name="data_classification" required>
-									{% for opt in ['Public','Internal','Confidential','Restricted'] %}
-									<option value="{{ opt }}" {{ 'selected' if application.data_classification==opt else '' }}>{{ opt }}</option>
-									{% endfor %}
-								</select>
-							</div>
-						</div>
-					</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="business_criticality" class="form-label">Business Criticality <span class="text-danger">*</span></label>
+                                <select class="form-select" id="business_criticality" name="business_criticality" required>
+                                    <option value="">Choose...</option>
+                                    <option value="Critical" {{ 'selected' if application.business_criticality=='Critical' else '' }}>Critical</option>
+                                    <option value="High" {{ 'selected' if application.business_criticality=='High' else '' }}>High</option>
+                                    <option value="Medium" {{ 'selected' if application.business_criticality=='Medium' else '' }}>Medium</option>
+                                    <option value="Low" {{ 'selected' if application.business_criticality=='Low' else '' }}>Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_classification" class="form-label">Data Classification *</label>
+                                <select class="form-select" id="data_classification" name="data_classification" required>
+                                    <option value="">Select Classification</option>
+                                    <option value="Public" {{ 'selected' if application.data_classification=='Public' else '' }}>Public</option>
+                                    <option value="Internal" {{ 'selected' if application.data_classification=='Internal' else '' }}>Internal</option>
+                                    <option value="Confidential" {{ 'selected' if application.data_classification=='Confidential' else '' }}>Confidential</option>
+                                    <option value="Restricted" {{ 'selected' if application.data_classification=='Restricted' else '' }}>Restricted</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-					<!-- Cloud Review -->
-					<div class="mb-3">
-						<label class="form-label fw-semibold">Cloud Review Required?</label>
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="cloud_review_required" value="yes" id="cloud_yes" {{ 'checked' if application.cloud_review_required=='yes' else '' }}>
-							<label class="form-check-label" for="cloud_yes">Yes</label>
-						</div>
-						<div class="form-check form-check-inline">
-							<input class="form-check-input" type="radio" name="cloud_review_required" value="no" id="cloud_no" {{ 'checked' if application.cloud_review_required!='yes' else '' }}>
-							<label class="form-check-label" for="cloud_no">No</label>
-						</div>
-					</div>
-					<div class="mb-3">
-						<label class="form-label">Cloud Providers</label>
-						{% set cloud_selected = (application.cloud_providers or '').split(',') %}
-						<div class="row g-2">
-							{% for provider in ['AWS','Azure','GCP'] %}
-							<div class="col-md-4">
-								<div class="form-check">
-									<input class="form-check-input" type="checkbox" name="cloud_providers" value="{{ provider }}" id="cloud_{{ provider|lower }}" {{ 'checked' if provider in cloud_selected else '' }}>
-									<label class="form-check-label" for="cloud_{{ provider|lower }}">{{ provider }}</label>
-								</div>
-							</div>
-							{% endfor %}
-						</div>
-					</div>
+                    <!-- File Upload Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5><i class="fas fa-file-upload"></i> Architecture & Documentation</h5>
+                            <p class="text-muted">Upload supporting documents for security review (Optional)</p>
+                        </div>
+                    </div>
 
-					<!-- Database Review fields removed per requirement -->
+                    <div class="mb-3">
+                        <label for="logical_architecture" class="form-label">Logical Architecture Diagram</label>
+                        <input type="file" class="form-control" id="logical_architecture" name="logical_architecture" 
+                               accept=".pdf,.png,.jpg,.jpeg,.svg,.vsdx,.drawio" 
+                               data-max-size="10485760">
+                        <div class="form-text">
+                            Accepted formats: PDF, PNG, JPG, SVG, Visio (.vsdx), Draw.io (.drawio) - Max 10MB
+                        </div>
+                    </div>
 
-					<!-- Technology Stack -->
-					<div class="mb-3">
-						<label class="form-label">Technology Stack</label>
-						{% set tech_selected = (application.technology_stack or '').split(',') %}
-						<div class="row">
-							{% for tech in ['JavaScript','Python','Java','C#','React','Angular','Vue.js','PHP','MySQL','PostgreSQL','MongoDB','Docker'] %}
-							<div class="col-md-4">
-								<div class="form-check">
-									<input class="form-check-input" type="checkbox" name="technology_stack" value="{{ tech }}" id="tech_{{ loop.index }}" {{ 'checked' if tech in tech_selected else '' }}>
-									<label class="form-check-label" for="tech_{{ loop.index }}">{{ tech }}</label>
-								</div>
-							</div>
-							{% endfor %}
-						</div>
-					</div>
+                    <div class="mb-3">
+                        <label for="physical_architecture" class="form-label">Physical Architecture Diagram</label>
+                        <input type="file" class="form-control" id="physical_architecture" name="physical_architecture" 
+                               accept=".pdf,.png,.jpg,.jpeg,.svg,.vsdx,.drawio"
+                               data-max-size="10485760">
+                        <div class="form-text">
+                            Accepted formats: PDF, PNG, JPG, SVG, Visio (.vsdx), Draw.io (.drawio) - Max 10MB
+                        </div>
+                    </div>
 
-					<hr>
-					<div class="d-flex justify-content-between">
-						<a href="{{ url_for('web_applications') }}" class="btn btn-secondary">
-							<i class="fas fa-arrow-left"></i> Cancel
-						</a>
-						<button type="submit" class="btn btn-primary">
-							<i class="fas fa-save"></i> Save Changes
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
+                    <div class="mb-3">
+                        <label for="overview_document" class="form-label">Application Overview Document</label>
+                        <input type="file" class="form-control" id="overview_document" name="overview_document" 
+                               accept=".pdf,.doc,.docx,.txt,.md"
+                               data-max-size="10485760">
+                        <div class="form-text">
+                            Accepted formats: PDF, Word (.doc, .docx), Text (.txt), Markdown (.md) - Max 10MB
+                        </div>
+                    </div>
+
+                    <!-- Cloud Infrastructure Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-cloud me-2"></i>Cloud Infrastructure & Services
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Select all cloud platforms and services used in your application for comprehensive security assessment
+                        </p>
+
+                        <!-- Cloud Platforms -->
+                    <div class="mb-3">
+                            <label class="form-label fw-semibold">Cloud Platforms</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="AWS" id="cloud_aws">
+                                        <label class="form-check-label" for="cloud_aws">
+                                            <i class="fab fa-aws text-warning me-2"></i>AWS
+                                        </label>
+                                            </div>
+                                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="Azure" id="cloud_azure">
+                                        <label class="form-check-label" for="cloud_azure">
+                                            <i class="fab fa-microsoft text-primary me-2"></i>Azure
+                                    </label>
+                                </div>
+                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="GCP" id="cloud_gcp">
+                                        <label class="form-check-label" for="cloud_gcp">
+                                            <i class="fab fa-google text-success me-2"></i>GCP
+                                        </label>
+                                            </div>
+                                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="DigitalOcean" id="cloud_digitalocean">
+                                        <label class="form-check-label" for="cloud_digitalocean">
+                                            <i class="fas fa-cloud text-info me-2"></i>DigitalOcean
+                                    </label>
+                                </div>
+                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="IBM Cloud" id="cloud_ibm">
+                                        <label class="form-check-label" for="cloud_ibm">
+                                            <i class="fas fa-cloud text-primary me-2"></i>IBM Cloud
+                                        </label>
+                        </div>
+                    </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="Oracle Cloud" id="cloud_oracle">
+                                        <label class="form-check-label" for="cloud_oracle">
+                                            <i class="fas fa-database text-danger me-2"></i>Oracle Cloud
+                                    </label>
+                                </div>
+                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="Alibaba Cloud" id="cloud_alibaba">
+                                        <label class="form-check-label" for="cloud_alibaba">
+                                            <i class="fas fa-cloud text-warning me-2"></i>Alibaba Cloud
+                                        </label>
+                                            </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_platforms" value="On-Premises" id="cloud_onprem">
+                                        <label class="form-check-label" for="cloud_onprem">
+                                            <i class="fas fa-server text-secondary me-2"></i>On-Premises
+                                    </label>
+                                </div>
+                            </div>
+                                            </div>
+                                    </div>
+
+                        <!-- Cloud Services -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Cloud Services & Features</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Serverless" id="cloud_serverless">
+                                        <label class="form-check-label" for="cloud_serverless">Serverless (Lambda, Functions, etc.)</label>
+                                </div>
+                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Containers" id="cloud_containers">
+                                        <label class="form-check-label" for="cloud_containers">Containers (EKS, AKS, GKE)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Storage" id="cloud_storage">
+                                        <label class="form-check-label" for="cloud_storage">Cloud Storage (S3, Blob, etc.)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="CDN" id="cloud_cdn">
+                                        <label class="form-check-label" for="cloud_cdn">CDN (CloudFront, Azure CDN, etc.)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Load Balancer" id="cloud_lb">
+                                        <label class="form-check-label" for="cloud_lb">Load Balancer</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Message Queue" id="cloud_mq">
+                                        <label class="form-check-label" for="cloud_mq">Message Queue (SQS, Service Bus, etc.)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Monitoring" id="cloud_monitoring">
+                                        <label class="form-check-label" for="cloud_monitoring">Cloud Monitoring</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="cloud_services" value="Security" id="cloud_security">
+                                        <label class="form-check-label" for="cloud_security">Security Services (WAF, IAM, etc.)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Legacy fields for backward compatibility -->
+                        <div style="display: none;">
+                            <input type="hidden" name="cloud_review_required" value="yes">
+                            <input type="hidden" name="cloud_providers" value="">
+                        </div>
+                    </div>
+
+                    <!-- Database Infrastructure Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-database me-2"></i>Database & Storage Technologies
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Select all database and storage technologies used in your application for comprehensive security assessment
+                        </p>
+
+                        <!-- Database Types -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Database Types</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="MongoDB" id="db_mongodb">
+                                        <label class="form-check-label" for="db_mongodb">
+                                            <i class="fas fa-leaf text-success me-2"></i>MongoDB
+                                        </label>
+                                            </div>
+                                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="PostgreSQL" id="db_postgresql">
+                                        <label class="form-check-label" for="db_postgresql">
+                                            <i class="fas fa-elephant text-primary me-2"></i>PostgreSQL
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="MySQL" id="db_mysql">
+                                        <label class="form-check-label" for="db_mysql">
+                                            <i class="fas fa-database text-warning me-2"></i>MySQL
+                                        </label>
+                                            </div>
+                                            </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="SQLite" id="db_sqlite">
+                                        <label class="form-check-label" for="db_sqlite">
+                                            <i class="fas fa-database text-info me-2"></i>SQLite
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="SQL Server" id="db_sqlserver">
+                                        <label class="form-check-label" for="db_sqlserver">
+                                            <i class="fas fa-database text-primary me-2"></i>SQL Server
+                                        </label>
+                            </div>
+                        </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="Oracle" id="db_oracle">
+                                        <label class="form-check-label" for="db_oracle">
+                                            <i class="fas fa-database text-danger me-2"></i>Oracle
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="Redis" id="db_redis">
+                                        <label class="form-check-label" for="db_redis">
+                                            <i class="fas fa-memory text-danger me-2"></i>Redis
+                                        </label>
+                                            </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="database_types" value="Cassandra" id="db_cassandra">
+                                        <label class="form-check-label" for="db_cassandra">
+                                            <i class="fas fa-database text-secondary me-2"></i>Cassandra
+                                        </label>
+                                    </div>
+                                </div>
+                                            </div>
+                                    </div>
+
+                        <!-- NoSQL Databases -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">NoSQL & Document Databases</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="CouchDB" id="db_couchdb">
+                                        <label class="form-check-label" for="db_couchdb">CouchDB</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="Couchbase" id="db_couchbase">
+                                        <label class="form-check-label" for="db_couchbase">Couchbase</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="DynamoDB" id="db_dynamodb">
+                                        <label class="form-check-label" for="db_dynamodb">DynamoDB</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="Cosmos DB" id="db_cosmos">
+                                        <label class="form-check-label" for="db_cosmos">Cosmos DB</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="Neo4j" id="db_neo4j">
+                                        <label class="form-check-label" for="db_neo4j">Neo4j</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="Elasticsearch" id="db_elasticsearch">
+                                        <label class="form-check-label" for="db_elasticsearch">Elasticsearch</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="InfluxDB" id="db_influxdb">
+                                        <label class="form-check-label" for="db_influxdb">InfluxDB</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="nosql_databases" value="CockroachDB" id="db_cockroach">
+                                        <label class="form-check-label" for="db_cockroach">CockroachDB</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- Storage Technologies -->
+                    <div class="mb-3">
+                            <label class="form-label fw-semibold">Storage & Caching Technologies</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="File System" id="storage_filesystem">
+                                        <label class="form-check-label" for="storage_filesystem">File System Storage</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="S3" id="storage_s3">
+                                        <label class="form-check-label" for="storage_s3">AWS S3</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="Azure Blob" id="storage_blob">
+                                        <label class="form-check-label" for="storage_blob">Azure Blob Storage</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="Google Cloud Storage" id="storage_gcs">
+                                        <label class="form-check-label" for="storage_gcs">Google Cloud Storage</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="Memcached" id="storage_memcached">
+                                        <label class="form-check-label" for="storage_memcached">Memcached</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="Hazelcast" id="storage_hazelcast">
+                                        <label class="form-check-label" for="storage_hazelcast">Hazelcast</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="storage_tech" value="No Database" id="storage_none">
+                                        <label class="form-check-label" for="storage_none">No Database/Storage</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Legacy fields for backward compatibility -->
+                        <div style="display: none;">
+                            <input type="hidden" name="database_review_required" value="yes">
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Technology Stack Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-code me-2"></i>Technology Stack & Architecture
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Select all technologies and frameworks used in your application for comprehensive security assessment
+                        </p>
+
+                        <!-- Application Type -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Application Type *</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="web_app" id="app_web" required>
+                                        <label class="form-check-label" for="app_web">Web Application</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="mobile_app" id="app_mobile">
+                                        <label class="form-check-label" for="app_mobile">Mobile Application</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="api_service" id="app_api">
+                                        <label class="form-check-label" for="app_api">API Service</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="microservice" id="app_micro">
+                                        <label class="form-check-label" for="app_micro">Microservice</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="desktop_app" id="app_desktop">
+                                        <label class="form-check-label" for="app_desktop">Desktop Application</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="serverless" id="app_serverless">
+                                        <label class="form-check-label" for="app_serverless">Serverless</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="monolith" id="app_monolith">
+                                        <label class="form-check-label" for="app_monolith">Monolithic</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="application_type" value="other" id="app_other">
+                                        <label class="form-check-label" for="app_other">Other</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Frontend Technologies -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Frontend Technologies</label>
+                            <div class="row g-2">
+                                {% set frontend_selected = (application.frontend_tech or '').split(', ') %}
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="React" id="frontend_react" {{ 'checked' if 'React' in frontend_selected else '' }}>
+                                        <label class="form-check-label" for="frontend_react">React</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Angular" id="frontend_angular">
+                                        <label class="form-check-label" for="frontend_angular">Angular</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Vue.js" id="frontend_vue">
+                                        <label class="form-check-label" for="frontend_vue">Vue.js</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Svelte" id="frontend_svelte">
+                                        <label class="form-check-label" for="frontend_svelte">Svelte</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="React Native" id="frontend_rn">
+                                        <label class="form-check-label" for="frontend_rn">React Native</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Flutter" id="frontend_flutter">
+                                        <label class="form-check-label" for="frontend_flutter">Flutter</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Xamarin" id="frontend_xamarin">
+                                        <label class="form-check-label" for="frontend_xamarin">Xamarin</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Electron" id="frontend_electron">
+                                        <label class="form-check-label" for="frontend_electron">Electron</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="jQuery" id="frontend_jquery">
+                                        <label class="form-check-label" for="frontend_jquery">jQuery</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="frontend_tech" value="Vanilla JS" id="frontend_vanilla">
+                                        <label class="form-check-label" for="frontend_vanilla">Vanilla JavaScript</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backend Technologies -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Backend Technologies</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Node.js" id="backend_node">
+                                        <label class="form-check-label" for="backend_node">Node.js</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Python" id="backend_python">
+                                        <label class="form-check-label" for="backend_python">Python</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Java" id="backend_java">
+                                        <label class="form-check-label" for="backend_java">Java</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="C#" id="backend_csharp">
+                                        <label class="form-check-label" for="backend_csharp">C#</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Go" id="backend_go">
+                                        <label class="form-check-label" for="backend_go">Go</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Rust" id="backend_rust">
+                                        <label class="form-check-label" for="backend_rust">Rust</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="PHP" id="backend_php">
+                                        <label class="form-check-label" for="backend_php">PHP</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Ruby" id="backend_ruby">
+                                        <label class="form-check-label" for="backend_ruby">Ruby</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Kotlin" id="backend_kotlin">
+                                        <label class="form-check-label" for="backend_kotlin">Kotlin</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_tech" value="Scala" id="backend_scala">
+                                        <label class="form-check-label" for="backend_scala">Scala</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backend Frameworks -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Backend Frameworks</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="Express.js" id="framework_express">
+                                        <label class="form-check-label" for="framework_express">Express.js</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="Django" id="framework_django">
+                                        <label class="form-check-label" for="framework_django">Django</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="Flask" id="framework_flask">
+                                        <label class="form-check-label" for="framework_flask">Flask</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="FastAPI" id="framework_fastapi">
+                                        <label class="form-check-label" for="framework_fastapi">FastAPI</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="Spring Boot" id="framework_spring">
+                                        <label class="form-check-label" for="framework_spring">Spring Boot</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="ASP.NET Core" id="framework_aspnet">
+                                        <label class="form-check-label" for="framework_aspnet">ASP.NET Core</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="Laravel" id="framework_laravel">
+                                        <label class="form-check-label" for="framework_laravel">Laravel</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="backend_frameworks" value="Rails" id="framework_rails">
+                                        <label class="form-check-label" for="framework_rails">Rails</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Container & Orchestration -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Container & Orchestration</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="container_tech" value="Docker" id="container_docker">
+                                        <label class="form-check-label" for="container_docker">Docker</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="container_tech" value="Kubernetes" id="container_k8s">
+                                        <label class="form-check-label" for="container_k8s">Kubernetes</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="container_tech" value="Docker Swarm" id="container_swarm">
+                                        <label class="form-check-label" for="container_swarm">Docker Swarm</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="container_tech" value="OpenShift" id="container_openshift">
+                                        <label class="form-check-label" for="container_openshift">OpenShift</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="container_tech" value="Istio" id="container_istio">
+                                        <label class="form-check-label" for="container_istio">Istio</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="container_tech" value="Linkerd" id="container_linkerd">
+                                        <label class="form-check-label" for="container_linkerd">Linkerd</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Legacy Technology Stack (for backward compatibility) -->
+                        <div class="mb-3" style="display: none;">
+                            <label class="form-label">Technology Stack (Legacy)</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="JavaScript" id="tech_js">
+                                    <label class="form-check-label" for="tech_js">JavaScript</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Python" id="tech_python">
+                                    <label class="form-check-label" for="tech_python">Python</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Java" id="tech_java">
+                                    <label class="form-check-label" for="tech_java">Java</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="C#" id="tech_csharp">
+                                    <label class="form-check-label" for="tech_csharp">C#</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="React" id="tech_react">
+                                    <label class="form-check-label" for="tech_react">React</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Angular" id="tech_angular">
+                                    <label class="form-check-label" for="tech_angular">Angular</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Vue.js" id="tech_vue">
+                                    <label class="form-check-label" for="tech_vue">Vue.js</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="PHP" id="tech_php">
+                                    <label class="form-check-label" for="tech_php">PHP</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Node.js" id="tech_node">
+                                    <label class="form-check-label" for="tech_node">Node.js</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value=".NET Core" id="tech_dotnet">
+                                    <label class="form-check-label" for="tech_dotnet">.NET Core</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Ruby" id="tech_ruby">
+                                    <label class="form-check-label" for="tech_ruby">Ruby</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="technology_stack" value="Docker" id="tech_docker">
+                                    <label class="form-check-label" for="tech_docker">Docker</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Context & Compliance Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-shield-alt me-2"></i>Security Context & Compliance
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Specify security requirements and compliance needs for targeted security assessment
+                        </p>
+
+                        <!-- Data Classification -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Data Types & Sensitivity</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="PII" id="data_pii">
+                                        <label class="form-check-label" for="data_pii">PII (Personal Data)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="PHI" id="data_phi">
+                                        <label class="form-check-label" for="data_phi">PHI (Health Data)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="Financial" id="data_financial">
+                                        <label class="form-check-label" for="data_financial">Financial Data</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="Intellectual Property" id="data_ip">
+                                        <label class="form-check-label" for="data_ip">Intellectual Property</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="Government" id="data_gov">
+                                        <label class="form-check-label" for="data_gov">Government Classified</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="Customer" id="data_customer">
+                                        <label class="form-check-label" for="data_customer">Customer Data</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="data_types" value="Public" id="data_public">
+                                        <label class="form-check-label" for="data_public">Public Data</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compliance Requirements -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Compliance & Regulatory Requirements</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="SOC 2" id="comp_soc2">
+                                        <label class="form-check-label" for="comp_soc2">SOC 2</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="ISO 27001" id="comp_iso27001">
+                                        <label class="form-check-label" for="comp_iso27001">ISO 27001</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="PCI DSS" id="comp_pci">
+                                        <label class="form-check-label" for="comp_pci">PCI DSS</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="HIPAA" id="comp_hipaa">
+                                        <label class="form-check-label" for="comp_hipaa">HIPAA</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="GDPR" id="comp_gdpr">
+                                        <label class="form-check-label" for="comp_gdpr">GDPR</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="CCPA" id="comp_ccpa">
+                                        <label class="form-check-label" for="comp_ccpa">CCPA</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="SOX" id="comp_sox">
+                                        <label class="form-check-label" for="comp_sox">SOX</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="compliance" value="FedRAMP" id="comp_fedramp">
+                                        <label class="form-check-label" for="comp_fedramp">FedRAMP</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Assessment -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Risk Assessment</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Risk Tolerance</label>
+                                    <select class="form-select" name="risk_tolerance">
+                                        <option value="">Select Risk Tolerance</option>
+                                        <option value="Low">Low - Conservative approach</option>
+                                        <option value="Medium">Medium - Balanced approach</option>
+                                        <option value="High">High - Aggressive approach</option>
+                                        <option value="Critical">Critical - Maximum security</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Business Impact</label>
+                                    <select class="form-select" name="business_impact">
+                                        <option value="">Select Business Impact</option>
+                                        <option value="Low">Low - Limited business impact</option>
+                                        <option value="Medium">Medium - Moderate business impact</option>
+                                        <option value="High">High - Significant business impact</option>
+                                        <option value="Critical">Critical - Severe business impact</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Third-Party Services & Integrations Section -->
+                    <div class="mb-4">
+                        <h6 class="form-section-title">
+                            <i class="fas fa-plug me-2"></i>Third-Party Services & Integrations
+                        </h6>
+                        <p class="form-section-description text-muted mb-3">
+                            Select third-party services and integrations that require security review
+                        </p>
+
+                        <!-- Authentication Services -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Authentication & Identity Services</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="OAuth 2.0" id="auth_oauth">
+                                        <label class="form-check-label" for="auth_oauth">OAuth 2.0</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="OpenID Connect" id="auth_oidc">
+                                        <label class="form-check-label" for="auth_oidc">OpenID Connect</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="SAML" id="auth_saml">
+                                        <label class="form-check-label" for="auth_saml">SAML</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="Auth0" id="auth_auth0">
+                                        <label class="form-check-label" for="auth_auth0">Auth0</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="AWS Cognito" id="auth_cognito">
+                                        <label class="form-check-label" for="auth_cognito">AWS Cognito</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="Azure AD" id="auth_azuread">
+                                        <label class="form-check-label" for="auth_azuread">Azure AD</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="Google Identity" id="auth_google">
+                                        <label class="form-check-label" for="auth_google">Google Identity</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="auth_services" value="Okta" id="auth_okta">
+                                        <label class="form-check-label" for="auth_okta">Okta</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Services -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment & Financial Services</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="payment_services" value="Stripe" id="pay_stripe">
+                                        <label class="form-check-label" for="pay_stripe">Stripe</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="payment_services" value="PayPal" id="pay_paypal">
+                                        <label class="form-check-label" for="pay_paypal">PayPal</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="payment_services" value="Square" id="pay_square">
+                                        <label class="form-check-label" for="pay_square">Square</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="payment_services" value="Braintree" id="pay_braintree">
+                                        <label class="form-check-label" for="pay_braintree">Braintree</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Communication Services -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Communication & Notification Services</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="comm_services" value="Twilio" id="comm_twilio">
+                                        <label class="form-check-label" for="comm_twilio">Twilio</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="comm_services" value="SendGrid" id="comm_sendgrid">
+                                        <label class="form-check-label" for="comm_sendgrid">SendGrid</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="comm_services" value="AWS SES" id="comm_ses">
+                                        <label class="form-check-label" for="comm_ses">AWS SES</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="comm_services" value="Mailgun" id="comm_mailgun">
+                                        <label class="form-check-label" for="comm_mailgun">Mailgun</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analytics & Monitoring -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Analytics & Monitoring Services</label>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="analytics_services" value="Google Analytics" id="analytics_ga">
+                                        <label class="form-check-label" for="analytics_ga">Google Analytics</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="analytics_services" value="Mixpanel" id="analytics_mixpanel">
+                                        <label class="form-check-label" for="analytics_mixpanel">Mixpanel</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="analytics_services" value="Datadog" id="analytics_datadog">
+                                        <label class="form-check-label" for="analytics_datadog">Datadog</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="analytics_services" value="New Relic" id="analytics_newrelic">
+                                        <label class="form-check-label" for="analytics_newrelic">New Relic</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="analytics_services" value="Splunk" id="analytics_splunk">
+                                        <label class="form-check-label" for="analytics_splunk">Splunk</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="analytics_services" value="ELK Stack" id="analytics_elk">
+                                        <label class="form-check-label" for="analytics_elk">ELK Stack</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('web_applications') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Applications
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6><i class="fas fa-info-circle"></i> What happens next?</h6>
+                <ol class="mb-0">
+                    <li>Your application will be registered in the portal</li>
+                    <li>You'll be directed to the security questionnaire</li>
+                    <li>Complete the OWASP-based security assessment</li>
+                    <li>Receive detailed security recommendations</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+// Enhanced technology selection handling
+function updateLegacyFields() {
+    // Update cloud_review_required based on cloud platform selections
+    const cloudPlatforms = document.querySelectorAll('input[name="cloud_platforms"]:checked');
+    const cloudServices = document.querySelectorAll('input[name="cloud_services"]:checked');
+    const cloudReviewRequired = document.querySelector('input[name="cloud_review_required"]');
+    
+    if (cloudPlatforms.length > 0 || cloudServices.length > 0) {
+        cloudReviewRequired.value = 'yes';
+        
+        // Update cloud_providers for backward compatibility
+        const cloudProvidersField = document.querySelector('input[name="cloud_providers"]');
+        const selectedPlatforms = Array.from(cloudPlatforms).map(cb => cb.value).join(', ');
+        cloudProvidersField.value = selectedPlatforms;
+    } else {
+        cloudReviewRequired.value = 'no';
+        cloudProvidersField.value = '';
+    }
+    
+    // Update database_review_required based on database selections
+    const databaseTypes = document.querySelectorAll('input[name="database_types"]:checked');
+    const nosqlDatabases = document.querySelectorAll('input[name="nosql_databases"]:checked');
+    const storageTech = document.querySelectorAll('input[name="storage_tech"]:checked');
+    const databaseReviewRequired = document.querySelector('input[name="database_review_required"]');
+    
+    if (databaseTypes.length > 0 || nosqlDatabases.length > 0 || storageTech.length > 0) {
+        databaseReviewRequired.value = 'yes';
+    } else {
+        databaseReviewRequired.value = 'no';
+    }
+}
+
+// Add event listeners to all technology checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    const technologyCheckboxes = document.querySelectorAll('input[type="checkbox"][name^="cloud_"], input[type="checkbox"][name^="database_"], input[type="checkbox"][name^="nosql_"], input[type="checkbox"][name^="storage_"]');
+    
+    technologyCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateLegacyFields);
+    });
+    
+    // Initial update
+    updateLegacyFields();
+});
+
+// File size validation
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInputs = document.querySelectorAll('input[type="file"][data-max-size]');
+    
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const maxSize = parseInt(this.getAttribute('data-max-size'));
+            const file = this.files[0];
+            
+            if (file && file.size > maxSize) {
+                alert('File size exceeds 10MB limit. Please choose a smaller file.');
+                this.value = '';
+            }
+        });
+    });
+});
+</script>
+
 {% endblock %} 
