@@ -463,75 +463,89 @@ OWASP_TO_STRIDE_MAPPING = {
 
 # Restructured OWASP Security Questionnaires - Split into Application Review and Cloud Review
 SECURITY_QUESTIONNAIRES = {
-    # ===== APPLICATION REVIEW (14 Categories) =====
+    # ===== APPLICATION REVIEW (Enhanced - 16 Categories) =====
     "application_review": {
         "name": "Application Security Review",
-        "description": "Comprehensive OWASP-based security assessment covering 14 security categories for application development",
+        "description": "Comprehensive ASVS-based security assessment for application development, personalized based on technology stack",
         "review_type": "application_review",
         "categories": {
             "input_validation": {
-                "title": "Input Validation - OWASP A1, A3, A6",
-                "description": "OWASP Top 10 A03 (Injection) - Preventing injection attacks through proper input validation",
+                "title": "Input Validation & Data Sanitization - ASVS V5.1",
+                "description": "ASVS V5.1 - Input validation and data sanitization controls to prevent injection attacks",
                 "questions": [
                     {
                         "id": "input_1",
-                        "question": "How does your application validate and sanitize user input?",
-                        "description": "Input validation prevents injection attacks (SQL, XSS, XXE, NoSQL, LDAP, etc.)",
+                        "question": "How does your application validate and sanitize all user input on both client and server side?",
+                        "description": "Comprehensive input validation prevents injection attacks (SQL, XSS, XXE, NoSQL, LDAP, etc.)",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "input_2", 
-                        "question": "Are parameterized queries or prepared statements used for database interactions?",
-                        "description": "Prevents SQL injection by separating SQL code from data",
+                        "question": "Are parameterized queries or prepared statements used for all database interactions?",
+                        "description": "Prevents SQL injection by separating SQL code from data - critical for applications using databases",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "input_3",
-                        "question": "Is output encoding implemented to prevent XSS attacks?",
-                        "description": "Proper output encoding prevents Cross-Site Scripting vulnerabilities",
+                        "question": "Is output encoding implemented to prevent XSS attacks in all user-facing content?",
+                        "description": "Proper output encoding prevents Cross-Site Scripting vulnerabilities in web applications",
                         "type": "radio", 
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "input_4",
-                        "question": "Are file upload functionalities secured against malicious file uploads?",
-                        "description": "File upload validation prevents malware and code execution attacks",
+                        "question": "Are file upload functionalities secured with comprehensive validation (type, size, content)?",
+                        "description": "File upload validation prevents malware, code execution, and storage exhaustion attacks",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "input_5",
-                        "question": "Is input length validation implemented to prevent buffer overflow attacks?",
-                        "description": "Length validation prevents memory corruption and system crashes",
+                        "question": "Is input length validation implemented to prevent buffer overflow and DoS attacks?",
+                        "description": "Length validation prevents memory corruption, system crashes, and resource exhaustion",
                         "type": "radio", 
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "input_6",
+                        "question": "Are special characters and control sequences properly escaped in user input?",
+                        "description": "Proper escaping prevents command injection and data corruption attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "input_7",
+                        "question": "Is input validation performed using allowlists rather than blocklists?",
+                        "description": "Allowlist validation is more secure and prevents bypass techniques",
+                        "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
                 ]
             },
             "authentication": {
-                "title": "Authentication (Identity & Access Management - IAM) - OWASP A2",
-                "description": "OWASP Top 10 A07 (Identification and Authentication Failures) - Secure user authentication",
+                "title": "Authentication & Identity Management - ASVS V2.1",
+                "description": "ASVS V2.1 - Secure user authentication and identity management for application users",
                 "questions": [
                     {
                         "id": "auth_1",
-                        "question": "How does your application implement user authentication?",
-                        "description": "Strong authentication mechanisms prevent unauthorized access",
+                        "question": "How does your application implement secure user authentication mechanisms?",
+                        "description": "Strong authentication mechanisms prevent unauthorized access to application features",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "auth_2",
-                        "question": "Is multi-factor authentication (MFA) implemented for sensitive accounts?",
-                        "description": "MFA provides additional security layer beyond passwords",
+                        "question": "Is multi-factor authentication (MFA) implemented for all user accounts?",
+                        "description": "MFA provides additional security layer beyond passwords for all users",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "auth_3",
-                        "question": "Are password policies enforced (complexity, length, rotation)?",
-                        "description": "Strong password policies reduce brute force attack success",
+                        "question": "Are strong password policies enforced (complexity, length, rotation, history)?",
+                        "description": "Comprehensive password policies reduce brute force attack success",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
@@ -544,8 +558,22 @@ SECURITY_QUESTIONNAIRES = {
                     },
                     {
                         "id": "auth_5",
-                        "question": "Are authentication tokens securely generated and managed?",
+                        "question": "Are authentication tokens securely generated, stored, and managed?",
                         "description": "Secure token management prevents session hijacking and replay attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "auth_6",
+                        "question": "Is password recovery implemented securely without information disclosure?",
+                        "description": "Secure password recovery prevents account takeover through information leakage",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "auth_7",
+                        "question": "Are authentication attempts logged and monitored for suspicious activity?",
+                        "description": "Authentication monitoring helps detect brute force and credential stuffing attacks",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
@@ -961,42 +989,42 @@ SECURITY_QUESTIONNAIRES = {
                     }
                 ]
                     },
-            "api_security": {
-                "title": "API Security",
-                "description": "OWASP API Security Top 10 - Securing application programming interfaces",
+            "business_logic": {
+                "title": "Business Logic Security - ASVS V4.1",
+                "description": "ASVS V4.1 - Business logic security controls to prevent application-specific attacks",
                 "questions": [
                     {
-                        "id": "api_1",
-                        "question": "How are APIs authenticated, authorized, and access-controlled?",
-                        "description": "API security prevents unauthorized access to backend services and data",
-                        "type": "radio",
-                        "options": ["yes", "na", "no"]
-            },
-                    {
-                        "id": "api_2",
-                        "question": "Is API rate limiting and throttling implemented?",
-                        "description": "Rate limiting prevents API abuse and DoS attacks",
+                        "id": "business_1",
+                        "question": "Are business logic workflows protected against manipulation and bypass?",
+                        "description": "Business logic protection prevents workflow manipulation and unauthorized state changes",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
-                        "id": "api_3",
-                        "question": "Are API inputs validated and outputs sanitized?",
-                        "description": "Input validation prevents injection attacks through APIs",
+                        "id": "business_2",
+                        "question": "Is data integrity validation implemented for critical business operations?",
+                        "description": "Data integrity validation prevents business logic bypass and data corruption",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
-                        "id": "api_4",
-                        "question": "Is API versioning and deprecation properly managed?",
-                        "description": "Proper API versioning ensures security through controlled evolution",
+                        "id": "business_3",
+                        "question": "Are business rules enforced consistently across all application layers?",
+                        "description": "Consistent rule enforcement prevents business logic vulnerabilities",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
-                        "id": "api_5",
-                        "question": "Are API security headers and CORS policies properly configured?",
-                        "description": "Security headers and CORS prevent unauthorized cross-origin access",
+                        "id": "business_4",
+                        "question": "Is transaction atomicity and consistency maintained for critical operations?",
+                        "description": "Transaction integrity prevents partial state corruption and business logic bypass",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "business_5",
+                        "question": "Are business logic errors handled securely without information disclosure?",
+                        "description": "Secure error handling prevents business logic information leakage",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
@@ -1046,10 +1074,10 @@ SECURITY_QUESTIONNAIRES = {
         }
     },
 
-    # ===== CLOUD REVIEW (3 Cloud Platforms) =====
+    # ===== CLOUD REVIEW (Enhanced - 6 Cloud Platforms + Services) =====
     "cloud_review": {
         "name": "Cloud Security Review", 
-        "description": "Comprehensive OWASP Cloud Top 10 based security assessment for cloud infrastructure",
+        "description": "Comprehensive ASVS-based security assessment for cloud infrastructure, personalized based on selected platforms and services",
         "review_type": "cloud_review",
         "categories": {
             "aws_security": {
@@ -1178,7 +1206,7 @@ SECURITY_QUESTIONNAIRES = {
             },
             "gcp_security": {
                 "title": "GCP Cloud Security", 
-                "description": "OWASP Cloud Top 10 based security assessment for Google Cloud Platform",
+                "description": "ASVS-based security assessment for Google Cloud Platform infrastructure",
                 "questions": [
                     {
                         "id": "gcp_iam_1",
@@ -1237,14 +1265,157 @@ SECURITY_QUESTIONNAIRES = {
                         "options": ["yes", "na", "no"]
                     }
                 ]
+            },
+            "digitalocean_security": {
+                "title": "DigitalOcean Cloud Security",
+                "description": "ASVS-based security assessment for DigitalOcean cloud infrastructure",
+                "questions": [
+                    {
+                        "id": "do_iam_1",
+                        "question": "How is DigitalOcean IAM configured with proper access controls?",
+                        "description": "DigitalOcean IAM controls access to cloud resources and APIs",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "do_network_1",
+                        "question": "Are DigitalOcean firewall rules properly configured for network security?",
+                        "description": "Firewall rules control network traffic to DigitalOcean resources",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "do_data_1",
+                        "question": "Is data encryption implemented for DigitalOcean Spaces and databases?",
+                        "description": "Data encryption protects sensitive information in DigitalOcean services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "do_monitoring_1",
+                        "question": "Is DigitalOcean monitoring and alerting configured for security events?",
+                        "description": "Security monitoring helps detect and respond to threats",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "ibm_cloud_security": {
+                "title": "IBM Cloud Security",
+                "description": "ASVS-based security assessment for IBM Cloud infrastructure",
+                "questions": [
+                    {
+                        "id": "ibm_iam_1",
+                        "question": "How is IBM Cloud IAM configured with least privilege access?",
+                        "description": "IBM Cloud IAM controls access to cloud resources and services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "ibm_network_1",
+                        "question": "Are IBM Cloud security groups and network ACLs properly configured?",
+                        "description": "Network security controls protect IBM Cloud resources",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "ibm_data_1",
+                        "question": "Is IBM Cloud Key Protect used for encryption key management?",
+                        "description": "Key Protect provides centralized encryption key management",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "ibm_monitoring_1",
+                        "question": "Is IBM Cloud Security Advisor enabled for threat monitoring?",
+                        "description": "Security Advisor provides security insights and recommendations",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "oracle_cloud_security": {
+                "title": "Oracle Cloud Security",
+                "description": "ASVS-based security assessment for Oracle Cloud Infrastructure",
+                "questions": [
+                    {
+                        "id": "oracle_iam_1",
+                        "question": "How is Oracle Cloud IAM configured with proper policies?",
+                        "description": "Oracle Cloud IAM controls access to cloud resources and services",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_network_1",
+                        "question": "Are Oracle Cloud security lists and network security groups configured?",
+                        "description": "Network security controls protect Oracle Cloud resources",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_data_1",
+                        "question": "Is Oracle Cloud Vault used for encryption key management?",
+                        "description": "Vault provides centralized encryption key management",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_monitoring_1",
+                        "question": "Is Oracle Cloud Security Monitoring enabled for threat detection?",
+                        "description": "Security Monitoring provides threat detection and response",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "cloud_services_security": {
+                "title": "Cloud Services Security",
+                "description": "ASVS-based security assessment for cloud services and features",
+                "questions": [
+                    {
+                        "id": "serverless_1",
+                        "question": "Are serverless functions secured with proper IAM and resource limits?",
+                        "description": "Serverless security prevents unauthorized access and resource exhaustion",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "containers_1",
+                        "question": "Are container services (EKS, AKS, GKE) properly secured and configured?",
+                        "description": "Container security prevents container escape and cluster compromise",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "storage_1",
+                        "question": "Are cloud storage services (S3, Blob, GCS) properly secured and encrypted?",
+                        "description": "Storage security prevents data breaches and unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "cdn_1",
+                        "question": "Are CDN services (CloudFront, Azure CDN) properly configured for security?",
+                        "description": "CDN security prevents DDoS attacks and content tampering",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "monitoring_1",
+                        "question": "Are cloud monitoring and logging services properly configured?",
+                        "description": "Cloud monitoring enables security incident detection and response",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
             }
         }
     },
 
-    # ===== DATABASE REVIEW (3 Database Platforms) =====
+    # ===== DATABASE REVIEW (Enhanced - 8 Database Types) =====
     "database_review": {
         "name": "Database Security Review",
-        "description": "Comprehensive OWASP-based security assessment for database infrastructure covering MongoDB, PostgreSQL, and MySQL",
+        "description": "Comprehensive ASVS-based security assessment for database infrastructure, personalized based on selected database types",
         "review_type": "database_review",
         "categories": {
             "mongodb_security": {
@@ -1401,19 +1572,19 @@ SECURITY_QUESTIONNAIRES = {
             },
             "mysql_security": {
                 "title": "MySQL Security",
-                "description": "OWASP-based security assessment for MySQL database instances", 
+                "description": "ASVS-based security assessment for MySQL database instances", 
                 "questions": [
                     {
                         "id": "mysql_auth_1",
                         "question": "Is MySQL authentication configured with strong password validation?",
-                        "description": "OWASP A07 (Identification and Authentication Failures) - Enforce strong password policies",
+                        "description": "ASVS V2.1 - Enforce strong password policies for database access",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "mysql_auth_2",
                         "question": "Are MySQL user accounts created with specific host restrictions?",
-                        "description": "OWASP A01 (Broken Access Control) - Limit user access by host/network",
+                        "description": "ASVS V1.1 - Limit user access by host/network for least privilege",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
@@ -1427,35 +1598,35 @@ SECURITY_QUESTIONNAIRES = {
                     {
                         "id": "mysql_network_1",
                         "question": "Is MySQL configured to bind only to required network interfaces?",
-                        "description": "OWASP A05 (Security Misconfiguration) - Minimize network attack surface",
+                        "description": "ASVS V1.4 - Minimize network attack surface",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "mysql_network_2",
                         "question": "Is SSL/TLS encryption enforced for all MySQL client connections?",
-                        "description": "OWASP A02 (Cryptographic Failures) - Secure data in transit",
+                        "description": "ASVS V3.1 - Secure data in transit",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "mysql_data_1",
                         "question": "Is MySQL data encryption at rest implemented using InnoDB encryption?",
-                        "description": "OWASP A02 (Cryptographic Failures) - Protect stored data",
+                        "description": "ASVS V3.1 - Protect stored data with encryption",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "mysql_audit_1",
                         "question": "Is MySQL audit logging enabled to track database access and changes?",
-                        "description": "OWASP A09 (Security Logging and Monitoring Failures) - Monitor database activities",
+                        "description": "ASVS V8.1 - Monitor database activities for security",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
                     {
                         "id": "mysql_injection_1",
                         "question": "Are prepared statements used to prevent SQL injection attacks?",
-                        "description": "OWASP A03 (Injection) - Prevent SQL injection vulnerabilities",
+                        "description": "ASVS V5.1 - Prevent SQL injection vulnerabilities",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     },
@@ -1469,7 +1640,157 @@ SECURITY_QUESTIONNAIRES = {
                     {
                         "id": "mysql_config_1",
                         "question": "Are MySQL security configurations reviewed against CIS benchmarks?",
-                        "description": "OWASP A05 (Security Misconfiguration) - Follow security hardening guidelines",
+                        "description": "ASVS V1.4 - Follow security hardening guidelines",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "sqlserver_security": {
+                "title": "SQL Server Security",
+                "description": "ASVS-based security assessment for Microsoft SQL Server database instances",
+                "questions": [
+                    {
+                        "id": "sqlserver_auth_1",
+                        "question": "Is SQL Server authentication configured with Windows Authentication mode?",
+                        "description": "Windows Authentication provides stronger security than SQL Server authentication",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "sqlserver_auth_2",
+                        "question": "Are SQL Server logins configured with strong password policies?",
+                        "description": "Strong password policies prevent brute force attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "sqlserver_network_1",
+                        "question": "Is SQL Server configured to use encrypted connections (TLS)?",
+                        "description": "Encrypted connections protect data in transit",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "sqlserver_data_1",
+                        "question": "Is Transparent Data Encryption (TDE) enabled for SQL Server databases?",
+                        "description": "TDE provides encryption at rest for database files",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "sqlserver_audit_1",
+                        "question": "Is SQL Server audit logging enabled for security events?",
+                        "description": "Audit logging helps detect unauthorized access and changes",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "oracle_security": {
+                "title": "Oracle Database Security",
+                "description": "ASVS-based security assessment for Oracle database instances",
+                "questions": [
+                    {
+                        "id": "oracle_auth_1",
+                        "question": "Is Oracle database configured with strong password policies?",
+                        "description": "Strong password policies prevent unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_auth_2",
+                        "question": "Are Oracle database users created with minimal necessary privileges?",
+                        "description": "Principle of least privilege reduces attack surface",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_network_1",
+                        "question": "Is Oracle Net configured with encryption for client connections?",
+                        "description": "Encrypted connections protect data in transit",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_data_1",
+                        "question": "Is Oracle Advanced Security (OAS) implemented for data encryption?",
+                        "description": "OAS provides comprehensive data encryption capabilities",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "oracle_audit_1",
+                        "question": "Is Oracle audit logging enabled for security monitoring?",
+                        "description": "Audit logging helps detect security incidents",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "redis_security": {
+                "title": "Redis Security",
+                "description": "ASVS-based security assessment for Redis database instances",
+                "questions": [
+                    {
+                        "id": "redis_auth_1",
+                        "question": "Is Redis authentication enabled with strong passwords?",
+                        "description": "Authentication prevents unauthorized access to Redis",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "redis_network_1",
+                        "question": "Is Redis configured to bind only to required network interfaces?",
+                        "description": "Network binding limits exposure to authorized networks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "redis_data_1",
+                        "question": "Is Redis configured with data persistence and backup strategies?",
+                        "description": "Data persistence ensures data availability and recovery",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "redis_config_1",
+                        "question": "Are Redis security configurations hardened (disable dangerous commands)?",
+                        "description": "Hardened configuration prevents command injection attacks",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    }
+                ]
+            },
+            "cassandra_security": {
+                "title": "Cassandra Security",
+                "description": "ASVS-based security assessment for Apache Cassandra database instances",
+                "questions": [
+                    {
+                        "id": "cassandra_auth_1",
+                        "question": "Is Cassandra authentication enabled with proper user management?",
+                        "description": "Authentication prevents unauthorized access to Cassandra",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "cassandra_network_1",
+                        "question": "Is Cassandra configured with encrypted inter-node communication?",
+                        "description": "Encrypted communication protects data in transit between nodes",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "cassandra_data_1",
+                        "question": "Is Cassandra configured with data encryption at rest?",
+                        "description": "Data encryption protects stored data from unauthorized access",
+                        "type": "radio",
+                        "options": ["yes", "na", "no"]
+                    },
+                    {
+                        "id": "cassandra_audit_1",
+                        "question": "Is Cassandra audit logging enabled for security monitoring?",
+                        "description": "Audit logging helps detect unauthorized access and changes",
                         "type": "radio",
                         "options": ["yes", "na", "no"]
                     }
@@ -2186,7 +2507,10 @@ def filter_cloud_questions_by_providers(questionnaire_data, cloud_providers):
     provider_mapping = {
         'AWS': 'aws_security',
         'AZURE': 'azure_security', 
-        'GCP': 'gcp_security'
+        'GCP': 'gcp_security',
+        'DIGITALOCEAN': 'digitalocean_security',
+        'IBM CLOUD': 'ibm_cloud_security',
+        'ORACLE CLOUD': 'oracle_cloud_security'
     }
     
     # Filter categories based on selected providers
@@ -2216,7 +2540,11 @@ def filter_database_questions_by_types(questionnaire_data, database_types):
     db_mapping = {
         'mongodb': 'mongodb_security',
         'postgresql': 'postgresql_security', 
-        'mysql': 'mysql_security'
+        'mysql': 'mysql_security',
+        'sql server': 'sqlserver_security',
+        'oracle': 'oracle_security',
+        'redis': 'redis_security',
+        'cassandra': 'cassandra_security'
     }
     
     # Filter categories based on selected database types
