@@ -225,6 +225,35 @@ def init_db():
     except Exception as e:
         print(f"ℹ️ database_types column already exists or error: {e}")
     
+    # Add enhanced technology stack columns
+    enhanced_columns = [
+        ('application_type', 'TEXT'),
+        ('frontend_tech', 'TEXT'),
+        ('backend_tech', 'TEXT'),
+        ('backend_frameworks', 'TEXT'),
+        ('container_tech', 'TEXT'),
+        ('data_types', 'TEXT'),
+        ('compliance', 'TEXT'),
+        ('risk_tolerance', 'TEXT'),
+        ('business_impact', 'TEXT'),
+        ('auth_services', 'TEXT'),
+        ('payment_services', 'TEXT'),
+        ('comm_services', 'TEXT'),
+        ('analytics_services', 'TEXT'),
+        # Enhanced cloud and database fields
+        ('cloud_platforms', 'TEXT'),
+        ('cloud_services', 'TEXT'),
+        ('nosql_databases', 'TEXT'),
+        ('storage_tech', 'TEXT')
+    ]
+    
+    for column_name, column_type in enhanced_columns:
+        try:
+            conn.execute(f'ALTER TABLE applications ADD COLUMN {column_name} {column_type} DEFAULT ""')
+            print(f"✅ Added {column_name} column")
+        except Exception as e:
+            print(f"ℹ️ {column_name} column already exists or error: {e}")
+    
     # Add category preferences columns
     try:
         conn.execute('ALTER TABLE applications ADD COLUMN category_preferences TEXT DEFAULT "{}"')
@@ -1477,6 +1506,135 @@ def get_questionnaire_for_field(field):
         # Fallback to application review
         return SECURITY_QUESTIONNAIRES['application_review']
 
+def determine_required_reviews(application_data):
+    """
+    Enhanced function to determine which security reviews are required based on comprehensive application data
+    """
+    required_reviews = {
+        'application_review': True,  # Always required
+        'cloud_review': False,
+        'database_review': False,
+        'infrastructure_review': False,
+        'compliance_review': False,
+        'api_review': False
+    }
+    
+    # Cloud Review Requirements
+    cloud_indicators = [
+        application_data.get('cloud_review_required') == 'yes',
+        bool(application_data.get('cloud_providers')),
+        bool(application_data.get('cloud_platforms')),
+        bool(application_data.get('cloud_services')),
+        'AWS' in (application_data.get('cloud_providers') or ''),
+        'Azure' in (application_data.get('cloud_providers') or ''),
+        'GCP' in (application_data.get('cloud_providers') or ''),
+        'AWS' in (application_data.get('cloud_platforms') or ''),
+        'Azure' in (application_data.get('cloud_platforms') or ''),
+        'GCP' in (application_data.get('cloud_platforms') or ''),
+        'DigitalOcean' in (application_data.get('cloud_platforms') or ''),
+        'IBM Cloud' in (application_data.get('cloud_platforms') or ''),
+        'Oracle Cloud' in (application_data.get('cloud_platforms') or ''),
+        'Alibaba Cloud' in (application_data.get('cloud_platforms') or ''),
+        'Serverless' in (application_data.get('cloud_services') or ''),
+        'Containers' in (application_data.get('cloud_services') or ''),
+        'Storage' in (application_data.get('cloud_services') or ''),
+        'CDN' in (application_data.get('cloud_services') or ''),
+        'serverless' in (application_data.get('application_type') or '').lower(),
+        'AWS Cognito' in (application_data.get('auth_services') or ''),
+        'Azure AD' in (application_data.get('auth_services') or ''),
+        'AWS SES' in (application_data.get('comm_services') or '')
+    ]
+    required_reviews['cloud_review'] = any(cloud_indicators)
+    
+    # Database Review Requirements
+    database_indicators = [
+        application_data.get('database_review_required') == 'yes',
+        bool(application_data.get('database_types')),
+        bool(application_data.get('nosql_databases')),
+        bool(application_data.get('storage_tech')),
+        'MongoDB' in (application_data.get('database_types') or ''),
+        'PostgreSQL' in (application_data.get('database_types') or ''),
+        'MySQL' in (application_data.get('database_types') or ''),
+        'SQLite' in (application_data.get('database_types') or ''),
+        'SQL Server' in (application_data.get('database_types') or ''),
+        'Oracle' in (application_data.get('database_types') or ''),
+        'Redis' in (application_data.get('database_types') or ''),
+        'Cassandra' in (application_data.get('database_types') or ''),
+        'CouchDB' in (application_data.get('nosql_databases') or ''),
+        'Couchbase' in (application_data.get('nosql_databases') or ''),
+        'DynamoDB' in (application_data.get('nosql_databases') or ''),
+        'Cosmos DB' in (application_data.get('nosql_databases') or ''),
+        'Neo4j' in (application_data.get('nosql_databases') or ''),
+        'Elasticsearch' in (application_data.get('nosql_databases') or ''),
+        'InfluxDB' in (application_data.get('nosql_databases') or ''),
+        'CockroachDB' in (application_data.get('nosql_databases') or ''),
+        'S3' in (application_data.get('storage_tech') or ''),
+        'Azure Blob' in (application_data.get('storage_tech') or ''),
+        'Google Cloud Storage' in (application_data.get('storage_tech') or ''),
+        'Memcached' in (application_data.get('storage_tech') or ''),
+        'Hazelcast' in (application_data.get('storage_tech') or ''),
+        'MongoDB' in (application_data.get('backend_tech') or ''),
+        'PostgreSQL' in (application_data.get('backend_tech') or ''),
+        'MySQL' in (application_data.get('backend_tech') or '')
+    ]
+    required_reviews['database_review'] = any(database_indicators)
+    
+    # Infrastructure Review Requirements
+    infrastructure_indicators = [
+        'Docker' in (application_data.get('container_tech') or ''),
+        'Kubernetes' in (application_data.get('container_tech') or ''),
+        'Docker Swarm' in (application_data.get('container_tech') or ''),
+        'OpenShift' in (application_data.get('container_tech') or ''),
+        'Istio' in (application_data.get('container_tech') or ''),
+        'Linkerd' in (application_data.get('container_tech') or ''),
+        'microservice' in (application_data.get('application_type') or '').lower(),
+        application_data.get('deployment_environment') in ['production', 'hybrid']
+    ]
+    required_reviews['infrastructure_review'] = any(infrastructure_indicators)
+    
+    # Compliance Review Requirements
+    compliance_indicators = [
+        bool(application_data.get('compliance')),
+        'SOC 2' in (application_data.get('compliance') or ''),
+        'ISO 27001' in (application_data.get('compliance') or ''),
+        'PCI DSS' in (application_data.get('compliance') or ''),
+        'HIPAA' in (application_data.get('compliance') or ''),
+        'GDPR' in (application_data.get('compliance') or ''),
+        'CCPA' in (application_data.get('compliance') or ''),
+        'SOX' in (application_data.get('compliance') or ''),
+        'FedRAMP' in (application_data.get('compliance') or ''),
+        'PII' in (application_data.get('data_types') or ''),
+        'PHI' in (application_data.get('data_types') or ''),
+        'Financial' in (application_data.get('data_types') or ''),
+        application_data.get('risk_tolerance') in ['High', 'Critical'],
+        application_data.get('business_impact') in ['High', 'Critical']
+    ]
+    required_reviews['compliance_review'] = any(compliance_indicators)
+    
+    # API Review Requirements
+    api_indicators = [
+        'api_service' in (application_data.get('application_type') or '').lower(),
+        'microservice' in (application_data.get('application_type') or '').lower(),
+        'OAuth 2.0' in (application_data.get('auth_services') or ''),
+        'OpenID Connect' in (application_data.get('auth_services') or ''),
+        'SAML' in (application_data.get('auth_services') or ''),
+        'Stripe' in (application_data.get('payment_services') or ''),
+        'PayPal' in (application_data.get('payment_services') or ''),
+        'Square' in (application_data.get('payment_services') or ''),
+        'Braintree' in (application_data.get('payment_services') or ''),
+        'Twilio' in (application_data.get('comm_services') or ''),
+        'SendGrid' in (application_data.get('comm_services') or ''),
+        'Google Analytics' in (application_data.get('analytics_services') or ''),
+        'Mixpanel' in (application_data.get('analytics_services') or ''),
+        'Datadog' in (application_data.get('analytics_services') or ''),
+        'New Relic' in (application_data.get('analytics_services') or ''),
+        'Splunk' in (application_data.get('analytics_services') or ''),
+        'ELK Stack' in (application_data.get('analytics_services') or '')
+    ]
+    required_reviews['api_review'] = any(api_indicators)
+    
+    return required_reviews
+
 def filter_questions_by_technology(questionnaire_data, technology_stack, cloud_providers=None):
     """Filter questions based on technology stack and cloud providers"""
     if not technology_stack:
@@ -2013,7 +2171,28 @@ def web_create_application():
             'cloud_review_required': request.form.get('cloud_review_required', 'no'),
             'cloud_providers': ', '.join(request.form.getlist('cloud_providers')),
             'database_review_required': request.form.get('database_review_required', 'no'),
-            'database_types': ', '.join(request.form.getlist('database_types'))
+            'database_types': ', '.join(request.form.getlist('database_types')),
+            # Enhanced cloud and database fields
+            'cloud_platforms': ', '.join(request.form.getlist('cloud_platforms')),
+            'cloud_services': ', '.join(request.form.getlist('cloud_services')),
+            'nosql_databases': ', '.join(request.form.getlist('nosql_databases')),
+            'storage_tech': ', '.join(request.form.getlist('storage_tech')),
+            # Enhanced technology stack fields
+            'application_type': request.form.get('application_type', ''),
+            'frontend_tech': ', '.join(request.form.getlist('frontend_tech')),
+            'backend_tech': ', '.join(request.form.getlist('backend_tech')),
+            'backend_frameworks': ', '.join(request.form.getlist('backend_frameworks')),
+            'container_tech': ', '.join(request.form.getlist('container_tech')),
+            # Security context fields
+            'data_types': ', '.join(request.form.getlist('data_types')),
+            'compliance': ', '.join(request.form.getlist('compliance')),
+            'risk_tolerance': request.form.get('risk_tolerance', ''),
+            'business_impact': request.form.get('business_impact', ''),
+            # Third-party services
+            'auth_services': ', '.join(request.form.getlist('auth_services')),
+            'payment_services': ', '.join(request.form.getlist('payment_services')),
+            'comm_services': ', '.join(request.form.getlist('comm_services')),
+            'analytics_services': ', '.join(request.form.getlist('analytics_services'))
         }
         
         # Validate required fields
@@ -2048,15 +2227,25 @@ def web_create_application():
                                     deployment_environment, business_criticality,
                                     data_classification, author_id, status, logical_architecture_file,
                                     physical_architecture_file, overview_document_file,
-                                    cloud_review_required, cloud_providers, database_review_required, database_types, category_preferences)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    cloud_review_required, cloud_providers, database_review_required, database_types, category_preferences,
+                                    application_type, frontend_tech, backend_tech, backend_frameworks, container_tech,
+                                    data_types, compliance, risk_tolerance, business_impact,
+                                    auth_services, payment_services, comm_services, analytics_services,
+                                    cloud_platforms, cloud_services, nosql_databases, storage_tech)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (app_id, data['name'], data['description'], data['technology_stack'],
               data['deployment_environment'], data['business_criticality'],
               data['data_classification'], session['user_id'], 'draft',
               file_paths.get('logical_architecture_file'),
               file_paths.get('physical_architecture_file'),
               file_paths.get('overview_document_file'),
-              data['cloud_review_required'], data['cloud_providers'], data['database_review_required'], data['database_types'], '{}'))
+              data['cloud_review_required'], data['cloud_providers'], data['database_review_required'], data['database_types'], '{}',
+              data['application_type'], data['frontend_tech'], data['backend_tech'], 
+              data['backend_frameworks'], data['container_tech'],
+              data['data_types'], data['compliance'], data['risk_tolerance'], 
+              data['business_impact'], data['auth_services'], data['payment_services'], 
+              data['comm_services'], data['analytics_services'],
+              data['cloud_platforms'], data['cloud_services'], data['nosql_databases'], data['storage_tech']))
         
         conn.commit()
         conn.close()
@@ -2734,6 +2923,7 @@ def finalize_review(review_id):
     
     # Get detailed user information for better notifications
     analyst_details = conn.execute('SELECT first_name, last_name, email FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    analyst_name = session.get('user_name', 'Security Analyst')
     full_analyst_name = f"{analyst_details['first_name']} {analyst_details['last_name']}" if analyst_details else analyst_name
     analyst_email = analyst_details['email'] if analyst_details else 'Unknown'
     
