@@ -6,10 +6,10 @@
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-laptop-code"></i> My Applications</h2>
+            <h2 class="fw-bold" style="color: #212529; font-size: 2rem;"><i class="fas fa-laptop-code text-primary me-3"></i> My Applications</h2>
             {% if session.user_role == 'user' %}
-            <a href="{{ url_for('web_create_application') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Application
+            <a href="{{ url_for('web_create_application') }}" class="btn btn-primary btn-lg fw-medium" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px 24px;">
+                <i class="fas fa-plus me-2"></i> Add New Application
             </a>
             {% endif %}
         </div>
@@ -18,9 +18,9 @@
         <div class="row">
             {% for app in applications %}
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">{{ app.name }}</h5>
+                <div class="card h-100 shadow-sm" style="border: 2px solid #e9ecef;">
+                    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+                        <h5 class="mb-0 fw-bold" style="color: #212529; font-size: 1.2rem;">{{ app.name }}</h5>
                         <div class="d-flex gap-2">
                             <!-- Application Status -->
                             {% if app.status == 'draft' %}
@@ -49,55 +49,73 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ app.description[:100] }}{% if app.description|length > 100 %}...{% endif %}</p>
+                    <div class="card-body" style="background: #ffffff;">
+                        <p class="card-text fw-medium" style="color: #495057; line-height: 1.5;">{{ app.description[:100] }}{% if app.description|length > 100 %}...{% endif %}</p>
                         
                         <div class="mb-3">
-                            <small class="text-muted">
-                                <strong>Technology:</strong> {{ app.technology_stack }}<br>
-                                <strong>Environment:</strong> {{ app.deployment_environment }}<br>
-                                <strong>Criticality:</strong> {{ app.business_criticality }}
-                            </small>
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-code text-primary me-2"></i>
+                                        <strong style="color: #212529;">Technology:</strong>
+                                        <span class="ms-2 fw-medium" style="color: #495057;">{{ app.technology_stack }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-server text-info me-2"></i>
+                                        <strong style="color: #212529;">Environment:</strong>
+                                        <span class="ms-2 fw-medium" style="color: #495057;">{{ app.deployment_environment }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                        <strong style="color: #212529;">Criticality:</strong>
+                                        <span class="ms-2 fw-medium" style="color: #495057;">{{ app.business_criticality }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
 
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer" style="background: #f8f9fa; border-top: 1px solid #dee2e6;">
                         <div class="d-flex gap-2 mb-2">
                             {% if app.status == 'completed' and app.review_status %}
-                                <a href="{{ url_for('web_review_results', app_id=app.id) }}" class="btn btn-outline-primary btn-sm flex-fill">
-                                    <i class="fas fa-chart-line"></i> View Results
+                                <a href="{{ url_for('web_review_results', app_id=app.id) }}" class="btn btn-primary btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
+                                    <i class="fas fa-chart-line me-1"></i> View Results
                                 </a>
                             {% elif app.status == 'draft' %}
-                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-outline-success btn-sm flex-fill">
-                                    <i class="fas fa-clipboard-check"></i> Start Assessment
+                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-success btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
+                                    <i class="fas fa-clipboard-check me-1"></i> Start Assessment
                                 </a>
                             {% elif app.status == 'submitted' %}
-                                <span class="btn btn-outline-secondary btn-sm flex-fill disabled">
-                                    <i class="fas fa-clock"></i> Awaiting Review
+                                <span class="btn btn-warning btn-sm flex-fill disabled fw-medium" style="font-size: 0.9rem;">
+                                    <i class="fas fa-clock me-1"></i> Awaiting Review
                                 </span>
                             {% elif app.status == 'in_review' %}
-                                <span class="btn btn-outline-info btn-sm flex-fill disabled">
-                                    <i class="fas fa-search"></i> Under Review
+                                <span class="btn btn-info btn-sm flex-fill disabled fw-medium" style="font-size: 0.9rem;">
+                                    <i class="fas fa-search me-1"></i> Under Review
                                 </span>
                             {% elif app.status == 'rejected' %}
-                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-outline-warning btn-sm flex-fill">
-                                    <i class="fas fa-edit"></i> Revise & Resubmit
+                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-warning btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
+                                    <i class="fas fa-edit me-1"></i> Revise & Resubmit
                                 </a>
                             {% else %}
-                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-outline-success btn-sm flex-fill">
-                                    <i class="fas fa-clipboard-check"></i> Continue Assessment
+                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-success btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
+                                    <i class="fas fa-clipboard-check me-1"></i> Continue Assessment
                                 </a>
                             {% endif %}
                             {% if app.status == 'draft' %}
-                            <button class="btn btn-outline-secondary btn-sm" onclick="editApplication('{{ app.id }}')">
+                            <button class="btn btn-outline-secondary btn-sm fw-medium" onclick="editApplication('{{ app.id }}')" style="font-size: 0.9rem;">
                                 <i class="fas fa-edit"></i>
                             </button>
                             {% endif %}
                         </div>
                         {% if app.status in ['draft', 'rejected'] %}
-                        <button class="btn btn-outline-danger btn-sm w-100" onclick="deleteApplication('{{ app.id }}', '{{ app.name }}')">
-                            <i class="fas fa-trash"></i> Delete Application
+                        <button class="btn btn-danger btn-sm w-100 fw-medium" onclick="deleteApplication('{{ app.id }}', '{{ app.name }}')" style="font-size: 0.9rem;">
+                            <i class="fas fa-trash me-1"></i> Delete Application
                         </button>
                         {% endif %}
                     </div>
@@ -108,19 +126,19 @@
         {% else %}
         <div class="text-center py-5">
             <div class="mb-4">
-                <i class="fas fa-laptop-code fa-5x text-muted"></i>
+                <i class="fas fa-laptop-code fa-5x text-primary" style="opacity: 0.8;"></i>
             </div>
             {% if session.user_role == 'admin' %}
-            <h4>No Applications Available</h4>
-            <p class="text-muted mb-4">Applications submitted by users will appear here for administrative oversight.</p>
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-chart-line"></i> Go to Admin Dashboard
+            <h4 class="fw-bold mb-3" style="color: #212529; font-size: 1.5rem;">No Applications Available</h4>
+            <p class="text-muted mb-4" style="font-size: 1.1rem; color: #6c757d;">Applications submitted by users will appear here for administrative oversight.</p>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-lg fw-medium" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px 24px;">
+                <i class="fas fa-chart-line me-2"></i> Go to Admin Dashboard
             </a>
             {% else %}
-            <h4>No Applications Yet</h4>
-            <p class="text-muted mb-4">Get started by adding your first application for security review.</p>
-            <a href="{{ url_for('web_create_application') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-plus"></i> Add Your First Application
+            <h4 class="fw-bold mb-3" style="color: #212529; font-size: 1.5rem;">No Applications Yet</h4>
+            <p class="text-muted mb-4" style="font-size: 1.1rem; color: #6c757d;">Get started by adding your first application for security review.</p>
+            <a href="{{ url_for('web_create_application') }}" class="btn btn-primary btn-lg fw-medium" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px 24px;">
+                <i class="fas fa-plus me-2"></i> Add Your First Application
             </a>
             {% endif %}
         </div>

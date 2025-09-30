@@ -2650,25 +2650,24 @@ def determine_required_reviews(application_data):
     required_reviews['application_review'] = any(application_indicators)
     
     # Cloud Review Requirements
+    cloud_platforms = application_data.get('cloud_platforms', '') or ''
+    cloud_services = application_data.get('cloud_services', '') or ''
+    
     cloud_indicators = [
         application_data.get('cloud_review_required') == 'yes',
-        bool(application_data.get('cloud_providers')),
-        bool(application_data.get('cloud_platforms')),
-        bool(application_data.get('cloud_services')),
-        'AWS' in (application_data.get('cloud_providers') or ''),
-        'Azure' in (application_data.get('cloud_providers') or ''),
-        'GCP' in (application_data.get('cloud_providers') or ''),
-        'AWS' in (application_data.get('cloud_platforms') or ''),
-        'Azure' in (application_data.get('cloud_platforms') or ''),
-        'GCP' in (application_data.get('cloud_platforms') or ''),
-        'DigitalOcean' in (application_data.get('cloud_platforms') or ''),
-        'IBM Cloud' in (application_data.get('cloud_platforms') or ''),
-        'Oracle Cloud' in (application_data.get('cloud_platforms') or ''),
-        'Alibaba Cloud' in (application_data.get('cloud_platforms') or ''),
-        'Serverless' in (application_data.get('cloud_services') or ''),
-        'Containers' in (application_data.get('cloud_services') or ''),
-        'Storage' in (application_data.get('cloud_services') or ''),
-        'CDN' in (application_data.get('cloud_services') or ''),
+        bool(cloud_platforms and cloud_platforms.strip()),
+        bool(cloud_services and cloud_services.strip()),
+        'AWS' in cloud_platforms,
+        'Azure' in cloud_platforms,
+        'GCP' in cloud_platforms,
+        'DigitalOcean' in cloud_platforms,
+        'IBM Cloud' in cloud_platforms,
+        'Oracle Cloud' in cloud_platforms,
+        'Alibaba Cloud' in cloud_platforms,
+        'Serverless' in cloud_services,
+        'Containers' in cloud_services,
+        'Storage' in cloud_services,
+        'CDN' in cloud_services,
         'serverless' in (application_data.get('application_type') or '').lower(),
         'AWS Cognito' in (application_data.get('auth_services') or ''),
         'Azure AD' in (application_data.get('auth_services') or ''),
@@ -2887,6 +2886,195 @@ def filter_database_questions_by_types(questionnaire_data, database_types):
     
     # If no matching database types found, return empty dict (no questions)
     # This ensures only relevant database questions are shown
+    return filtered_data
+
+def personalize_questionnaire_categories(questionnaire_data, field_type, application_data):
+    """
+    Personalize questionnaire categories based on application technology stack and requirements
+    """
+    if not questionnaire_data or not application_data:
+        return questionnaire_data
+    
+    # Get application technology stack
+    frontend_tech = application_data.get('frontend_tech', '')
+    backend_tech = application_data.get('backend_tech', '')
+    database_types = application_data.get('database_types', '')
+    cloud_platforms = application_data.get('cloud_platforms', '')
+    cloud_services = application_data.get('cloud_services', '')
+    compliance_requirements = application_data.get('compliance', '')
+    auth_services = application_data.get('auth_services', '')
+    comm_services = application_data.get('comm_services', '')
+    third_party_services = application_data.get('third_party_services', '')
+    application_type = application_data.get('application_type', '')
+    business_criticality = application_data.get('business_criticality', '')
+    
+    # Convert string fields to lists for easier processing
+    if isinstance(database_types, str):
+        database_types = [db.strip() for db in database_types.split(',') if db.strip()]
+    if isinstance(cloud_platforms, str):
+        cloud_platforms = [platform.strip() for platform in cloud_platforms.split(',') if platform.strip()]
+    if isinstance(cloud_services, str):
+        cloud_services = [service.strip() for service in cloud_services.split(',') if service.strip()]
+    if isinstance(compliance_requirements, str):
+        compliance_requirements = [comp.strip() for comp in compliance_requirements.split(',') if comp.strip()]
+    if isinstance(auth_services, str):
+        auth_services = [auth.strip() for auth in auth_services.split(',') if auth.strip()]
+    if isinstance(comm_services, str):
+        comm_services = [comm.strip() for comm in comm_services.split(',') if comm.strip()]
+    if isinstance(third_party_services, str):
+        third_party_services = [service.strip() for service in third_party_services.split(',') if service.strip()]
+    
+    # Define category relevance mappings for each review type
+    category_mappings = {
+        'application_review': {
+            # Always include core categories
+            'always_include': [
+                'input_validation', 'authentication', 'session_management', 
+                'access_control', 'cryptography', 'error_handling', 'logging_monitoring'
+            ],
+            # Technology-specific categories
+            'frontend_tech': {
+                'React': ['client_side_security', 'input_validation'],
+                'Angular': ['client_side_security', 'input_validation'],
+                'Vue.js': ['client_side_security', 'input_validation'],
+                'JavaScript': ['client_side_security', 'input_validation'],
+                'TypeScript': ['client_side_security', 'input_validation']
+            },
+            'backend_tech': {
+                'Python': ['server_side_security', 'business_logic_security'],
+                'Node.js': ['server_side_security', 'business_logic_security'],
+                'Java': ['server_side_security', 'business_logic_security'],
+                'C#': ['server_side_security', 'business_logic_security'],
+                'PHP': ['server_side_security', 'business_logic_security']
+            },
+            'application_type': {
+                'web_app': ['web_security', 'session_management'],
+                'mobile_app': ['mobile_security', 'data_protection'],
+                'api_service': ['api_security', 'rate_limiting'],
+                'microservice': ['microservices_security', 'service_communication']
+            }
+        },
+        'cloud_review': {
+            'always_include': ['general_cloud_security'],
+            'cloud_platforms': {
+                'AWS': ['aws_security'],
+                'Azure': ['azure_security'],
+                'GCP': ['gcp_security'],
+                'DigitalOcean': ['digitalocean_security'],
+                'IBM Cloud': ['ibm_cloud_security'],
+                'Oracle Cloud': ['oracle_cloud_security']
+            },
+            'cloud_services': {
+                'Serverless': ['serverless_security'],
+                'Containers': ['container_security'],
+                'Storage': ['storage_security'],
+                'CDN': ['cdn_security']
+            }
+        },
+        'database_review': {
+            'always_include': ['general_database_security'],
+            'database_types': {
+                'MongoDB': ['mongodb_security'],
+                'PostgreSQL': ['postgresql_security'],
+                'MySQL': ['mysql_security'],
+                'SQL Server': ['sqlserver_security'],
+                'Oracle': ['oracle_security'],
+                'Redis': ['redis_security'],
+                'Cassandra': ['cassandra_security']
+            }
+        },
+        'infrastructure_review': {
+            'always_include': ['general_infrastructure_security'],
+            'cloud_services': {
+                'Containers': ['container_security', 'orchestration_security'],
+                'Kubernetes': ['orchestration_security', 'service_mesh_security'],
+                'Docker': ['container_security']
+            },
+            'application_type': {
+                'microservice': ['microservices_security', 'service_communication']
+            }
+        },
+        'compliance_review': {
+            'always_include': ['general_compliance_security'],
+            'compliance_requirements': {
+                'GDPR': ['data_protection'],
+                'CCPA': ['data_protection'],
+                'HIPAA': ['healthcare_compliance'],
+                'PCI DSS': ['financial_compliance'],
+                'SOX': ['financial_compliance'],
+                'SOC 2': ['security_frameworks'],
+                'ISO 27001': ['security_frameworks']
+            }
+        },
+        'api_review': {
+            'always_include': ['general_api_security'],
+            'application_type': {
+                'api_service': ['api_authentication', 'api_security', 'rate_limiting'],
+                'microservice': ['microservices_security', 'service_communication']
+            },
+            'auth_services': {
+                'OAuth 2.0': ['api_authentication'],
+                'OpenID Connect': ['api_authentication'],
+                'SAML': ['api_authentication']
+            }
+        }
+    }
+    
+    # Get mapping for current field type
+    if field_type not in category_mappings:
+        return questionnaire_data
+    
+    mapping = category_mappings[field_type]
+    relevant_categories = set()
+    
+    # Always include core categories
+    if 'always_include' in mapping:
+        relevant_categories.update(mapping['always_include'])
+    
+    # Add technology-specific categories
+    for tech_field, tech_mapping in mapping.items():
+        if tech_field == 'always_include':
+            continue
+            
+        tech_value = locals().get(tech_field, [])
+        if isinstance(tech_value, str):
+            tech_value = [tech_value]
+        
+        for tech in tech_value:
+            if tech in tech_mapping:
+                relevant_categories.update(tech_mapping[tech])
+    
+    # Special logic for compliance review based on business criticality
+    if field_type == 'compliance_review':
+        if business_criticality in ['Critical', 'High']:
+            relevant_categories.update(['audit_governance', 'industry_specific'])
+    
+    # Special logic for API review based on third-party services
+    if field_type == 'api_review' and third_party_services:
+        relevant_categories.add('third_party_integrations')
+    
+    # Filter questionnaire data to only include relevant categories
+    filtered_data = {}
+    for category_key, category_data in questionnaire_data.items():
+        if category_key in relevant_categories:
+            filtered_data[category_key] = category_data
+    
+    # If no categories match, return at least the general category
+    if not filtered_data and questionnaire_data:
+        general_categories = ['general_' + field_type.replace('_review', '') + '_security']
+        for category_key, category_data in questionnaire_data.items():
+            if any(general in category_key for general in general_categories):
+                filtered_data[category_key] = category_data
+                break
+    
+    # If still no categories, return the first available category
+    if not filtered_data and questionnaire_data:
+        first_key = next(iter(questionnaire_data.keys()))
+        filtered_data[first_key] = questionnaire_data[first_key]
+    
+    print(f"🔍 Personalized {field_type}: {len(filtered_data)} categories from {len(questionnaire_data)} total")
+    print(f"📊 Relevant categories: {list(filtered_data.keys())}")
+    
     return filtered_data
 
 # Web Routes
@@ -3578,30 +3766,74 @@ def web_security_assessment(app_id):
     
 
     
-    # Calculate question counts from questionnaires
-    app_review_questions = sum(len(cat['questions']) for cat in SECURITY_QUESTIONNAIRES['application_review']['categories'].values())
+    # Calculate personalized question counts for each review type
+    app_dict = dict(app) if hasattr(app, 'keys') else app
     
-    # Calculate cloud review questions based on selected providers
-    if cloud_review_required and cloud_providers:
-        # Filter cloud questions by selected providers to get accurate count
-        cloud_questionnaire_data = SECURITY_QUESTIONNAIRES['cloud_review']['categories']
-        filtered_cloud_data = filter_cloud_questions_by_providers(cloud_questionnaire_data, app['cloud_providers'])
-        cloud_review_questions = sum(len(cat['questions']) for cat in filtered_cloud_data.values())
+    # Application Review questions (personalized)
+    if app_review_required:
+        app_questionnaire_data = personalize_questionnaire_categories(
+            SECURITY_QUESTIONNAIRES['application_review']['categories'], 
+            'application_review', 
+            app_dict
+        )
+        app_review_questions = sum(len(cat['questions']) for cat in app_questionnaire_data.values())
     else:
-        # Default to total count if no providers selected
-        cloud_review_questions = sum(len(cat['questions']) for cat in SECURITY_QUESTIONNAIRES['cloud_review']['categories'].values())
+        app_review_questions = 0
     
-    # Calculate database review questions based on selected database types
-    if database_review_required and database_types:
-        # Filter database questions by selected types to get accurate count
-        database_questionnaire_data = SECURITY_QUESTIONNAIRES['database_review']['categories']
-        filtered_database_data = filter_database_questions_by_types(database_questionnaire_data, database_types)
-        database_review_questions = sum(len(cat['questions']) for cat in filtered_database_data.values())
-    elif database_review_required:
-        # If database review required but no types selected, show all
-        database_review_questions = sum(len(cat['questions']) for cat in SECURITY_QUESTIONNAIRES['database_review']['categories'].values())
+    # Cloud Review questions (personalized)
+    if cloud_review_required:
+        cloud_questionnaire_data = personalize_questionnaire_categories(
+            SECURITY_QUESTIONNAIRES['cloud_review']['categories'], 
+            'cloud_review', 
+            app_dict
+        )
+        cloud_review_questions = sum(len(cat['questions']) for cat in cloud_questionnaire_data.values())
+    else:
+        cloud_review_questions = 0
+    
+    # Database Review questions (personalized)
+    if database_review_required:
+        database_questionnaire_data = personalize_questionnaire_categories(
+            SECURITY_QUESTIONNAIRES['database_review']['categories'], 
+            'database_review', 
+            app_dict
+        )
+        database_review_questions = sum(len(cat['questions']) for cat in database_questionnaire_data.values())
     else:
         database_review_questions = 0
+    
+    # Infrastructure Review questions (personalized)
+    if infrastructure_review_required:
+        infrastructure_questionnaire_data = personalize_questionnaire_categories(
+            SECURITY_QUESTIONNAIRES['infrastructure_review']['categories'], 
+            'infrastructure_review', 
+            app_dict
+        )
+        infrastructure_review_questions = sum(len(cat['questions']) for cat in infrastructure_questionnaire_data.values())
+    else:
+        infrastructure_review_questions = 0
+    
+    # Compliance Review questions (personalized)
+    if compliance_review_required:
+        compliance_questionnaire_data = personalize_questionnaire_categories(
+            SECURITY_QUESTIONNAIRES['compliance_review']['categories'], 
+            'compliance_review', 
+            app_dict
+        )
+        compliance_review_questions = sum(len(cat['questions']) for cat in compliance_questionnaire_data.values())
+    else:
+        compliance_review_questions = 0
+    
+    # API Review questions (personalized)
+    if api_review_required:
+        api_questionnaire_data = personalize_questionnaire_categories(
+            SECURITY_QUESTIONNAIRES['api_review']['categories'], 
+            'api_review', 
+            app_dict
+        )
+        api_review_questions = sum(len(cat['questions']) for cat in api_questionnaire_data.values())
+    else:
+        api_review_questions = 0
     
     return render_template('security_assessment.html', 
                          application=app,
@@ -3631,7 +3863,10 @@ def web_security_assessment(app_id):
                          user_role=user_role,
                          app_review_questions=app_review_questions,
                          cloud_review_questions=cloud_review_questions,
-                         database_review_questions=database_review_questions)
+                         database_review_questions=database_review_questions,
+                         infrastructure_review_questions=infrastructure_review_questions,
+                         compliance_review_questions=compliance_review_questions,
+                         api_review_questions=api_review_questions)
 
 @app.route('/field-selection')
 @app.route('/field-selection/<app_id>')
@@ -3753,17 +3988,21 @@ def web_questionnaire(app_id):
         review_type = 'application_review'
         field_type = 'comprehensive_application'  # Normalize field type
 
-    # Apply cloud provider filtering for cloud reviews
+    # Apply comprehensive personalization based on application technology stack
+    # Convert sqlite3.Row to dict for compatibility with personalize_questionnaire_categories
+    app_dict = dict(app) if hasattr(app, 'keys') else app
+    questionnaire_data = personalize_questionnaire_categories(questionnaire_data, field_type, app_dict)
+    
+    # Apply additional specific filtering for backward compatibility
     if field_type == 'cloud_review' and 'cloud_providers' in app.keys() and app['cloud_providers']:
         questionnaire_data = filter_cloud_questions_by_providers(questionnaire_data, app['cloud_providers'])
-        print(f"🔍 Cloud filtering applied for providers: {app['cloud_providers']}")
-        print(f"📊 Filtered questionnaire has {len(questionnaire_data)} categories")
+        print(f"🔍 Additional cloud filtering applied for providers: {app['cloud_providers']}")
+        print(f"📊 Final cloud questionnaire has {len(questionnaire_data)} categories")
     
-    # Apply database type filtering for database reviews
     if field_type == 'database_review' and 'database_types' in app.keys() and app['database_types']:
         questionnaire_data = filter_database_questions_by_types(questionnaire_data, app['database_types'])
-        print(f"🔍 Database filtering applied for types: {app['database_types']}")
-        print(f"📊 Filtered questionnaire has {len(questionnaire_data)} categories")
+        print(f"🔍 Additional database filtering applied for types: {app['database_types']}")
+        print(f"📊 Final database questionnaire has {len(questionnaire_data)} categories")
     
     # Get category preferences for this application and field type
     category_preferences = {}

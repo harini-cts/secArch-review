@@ -11,20 +11,43 @@
         </div>
 
         <!-- Application Context -->
-        <div class="alert alert-info mb-4">
-            <h6><i class="fas fa-info-circle"></i> Application: {{ application.name }}</h6>
-            <p class="mb-0">{{ application.description }}</p>
+        <div class="card border-0 bg-light mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-2 text-primary">
+                            <i class="fas fa-laptop-code me-2"></i>{{ application.name }}
+                        </h5>
+                        <p class="text-muted mb-0">{{ application.description }}</p>
+                        {% if application.technology_stack %}
+                        <div class="mt-2">
+                            <span class="badge bg-primary">{{ application.technology_stack }}</span>
+        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex flex-column align-items-end">
+                            <span class="badge bg-info mb-2">{{ application.application_type|title }}</span>
+                            <span class="badge {% if application.business_criticality == 'High' %}bg-danger{% elif application.business_criticality == 'Medium' %}bg-warning{% else %}bg-success{% endif %}">
+                                {{ application.business_criticality or 'Medium' }} Criticality
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Simplified Progress Overview -->
+        <!-- Enhanced Progress Overview -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card border-0 bg-light">
-                    <div class="card-body">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
                         <div class="row align-items-center">
                             <div class="col-md-8">
-                                <h5 class="mb-2"><i class="fas fa-tasks text-primary me-2"></i>Security Review Progress</h5>
-                                <p class="text-muted mb-0">Complete the required security assessments for your application</p>
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-chart-line me-2"></i>Security Review Progress
+                                </h5>
+                                <small class="text-muted">Complete the required security assessments for your application</small>
                             </div>
                             <div class="col-md-4 text-end">
                                 {% set total_reviews = 0 %}
@@ -35,10 +58,46 @@
                                 {% if infrastructure_review_required %}{% set total_reviews = total_reviews + 1 %}{% if infrastructure_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
                                 {% if compliance_review_required %}{% set total_reviews = total_reviews + 1 %}{% if compliance_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
                                 {% if api_review_required %}{% set total_reviews = total_reviews + 1 %}{% if api_review_completed %}{% set completed_reviews = completed_reviews + 1 %}{% endif %}{% endif %}
-                                <div class="progress mt-2" style="height: 8px;">
-                                    <div class="progress-bar bg-success" style="width: {{ (completed_reviews / total_reviews * 100) if total_reviews > 0 else 0 }}%"></div>
+                                {% set progress_percentage = ((completed_reviews / total_reviews * 100) if total_reviews > 0 else 0)|round|int %}
+                                <div class="d-flex align-items-center justify-content-end">
+                                    <div class="me-3">
+                                        <div class="progress" style="width: 120px; height: 10px;">
+                                            <div class="progress-bar bg-success" data-width="{{ progress_percentage }}"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="h5 mb-0 text-primary">{{ completed_reviews }}/{{ total_reviews }}</div>
+                                        <small class="text-muted">reviews completed</small>
+                                    </div>
                                 </div>
-                                <small class="text-muted">{{ completed_reviews }}/{{ total_reviews }} reviews completed</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body py-3">
+                        <div class="row text-center">
+                            <div class="col-md-3 col-6 mb-2">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span class="fw-medium">{{ completed_reviews }} Completed</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-2">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-clock text-warning me-2"></i>
+                                    <span class="fw-medium">{{ total_reviews - completed_reviews }} Pending</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-2">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-percentage text-info me-2"></i>
+                                    <span class="fw-medium">{{ ((completed_reviews / total_reviews * 100) if total_reviews > 0 else 0)|round|int }}% Complete</span>
+                </div>
+            </div>
+                            <div class="col-md-3 col-6 mb-2">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-shield-alt text-primary me-2"></i>
+                                    <span class="fw-medium">{{ total_reviews }} Total Reviews</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -70,8 +129,8 @@
                                 <span class="badge bg-warning">Required</span>
                             {% endif %}
                         </div>
-                        
-                        <p class="text-muted small mb-3"><strong>Required because:</strong> Application type ({{ application.application_type }}) or technology stack requires security assessment</p>
+
+                        <p class="text-muted small mb-3">Comprehensive security assessment for application security and business logic</p>
 
                         {% if app_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -114,7 +173,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-light text-dark">{{ cloud_review_questions or 24 }} questions</span>
+                            <span class="badge bg-light text-dark">{{ cloud_review_questions }} questions</span>
                             {% if cloud_review_required %}
                                 {% if cloud_review_completed %}
                                     <span class="badge bg-success">Completed</span>
@@ -125,44 +184,26 @@
                                 <span class="badge bg-secondary">Not Required</span>
                             {% endif %}
                         </div>
+
+                        <p class="text-muted small mb-3">Comprehensive security assessment for cloud infrastructure and services</p>
                         
                         <div class="mb-3">
-                            {% if cloud_platforms %}
-                                {% if cloud_platforms is string %}
-                                    {% for platform in cloud_platforms.split(', ') %}
-                                        {% if platform == 'AWS' %}
-                                            <span class="badge bg-warning text-dark me-1">AWS</span>
-                                        {% elif platform == 'Azure' %}
-                                            <span class="badge bg-primary me-1">Azure</span>
-                                        {% elif platform == 'GCP' %}
-                                            <span class="badge bg-danger me-1">GCP</span>
-                                        {% else %}
-                                            <span class="badge bg-info me-1">{{ platform }}</span>
+                            {% if cloud_providers %}
+                                {% if cloud_providers is string %}
+                                    {% for platform in cloud_providers.split(', ') %}
+                                        {% if platform.strip() %}
+                                            <span class="badge bg-info me-1 mb-1">{{ platform.strip() }}</span>
                                         {% endif %}
                                     {% endfor %}
                                 {% else %}
-                                    {% for platform in cloud_platforms %}
-                                        {% if platform == 'AWS' %}
-                                            <span class="badge bg-warning text-dark me-1">AWS</span>
-                                        {% elif platform == 'Azure' %}
-                                            <span class="badge bg-primary me-1">Azure</span>
-                                        {% elif platform == 'GCP' %}
-                                            <span class="badge bg-danger me-1">GCP</span>
-                                        {% else %}
-                                            <span class="badge bg-info me-1">{{ platform }}</span>
+                                    {% for platform in cloud_providers %}
+                                        {% if platform.strip() %}
+                                            <span class="badge bg-info me-1 mb-1">{{ platform.strip() }}</span>
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
-                            {% else %}
-                                <span class="text-muted">No cloud platforms selected</span>
                             {% endif %}
                         </div>
-                        
-                        {% if cloud_review_required %}
-                            <p class="text-muted small mb-3"><strong>Required because:</strong> Cloud platforms ({{ cloud_platforms|join(', ') }}) or cloud services detected</p>
-                        {% else %}
-                            <p class="text-muted small mb-3"><strong>Not required:</strong> No cloud platforms or services detected</p>
-                        {% endif %}
 
                         {% if cloud_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -205,7 +246,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-light text-dark">{{ database_review_questions or 30 }} questions</span>
+                            <span class="badge bg-light text-dark">{{ database_review_questions }} questions</span>
                             {% if database_review_required %}
                                 {% if database_review_completed %}
                                     <span class="badge bg-success">Completed</span>
@@ -216,44 +257,26 @@
                                 <span class="badge bg-secondary">Not Required</span>
                             {% endif %}
                         </div>
+
+                        <p class="text-muted small mb-3">Comprehensive security assessment for database systems and data storage</p>
                         
                         <div class="mb-3">
                             {% if database_types %}
                                 {% if database_types is string %}
                                     {% for db_type in database_types.split(', ') %}
-                                        {% if db_type == 'MongoDB' %}
-                                            <span class="badge bg-success me-1">MongoDB</span>
-                                        {% elif db_type == 'PostgreSQL' %}
-                                            <span class="badge bg-primary me-1">PostgreSQL</span>
-                                        {% elif db_type == 'MySQL' %}
-                                            <span class="badge bg-warning text-dark me-1">MySQL</span>
-                                        {% else %}
-                                            <span class="badge bg-info me-1">{{ db_type }}</span>
+                                        {% if db_type.strip() %}
+                                            <span class="badge bg-success me-1 mb-1">{{ db_type.strip() }}</span>
                                         {% endif %}
                                     {% endfor %}
                                 {% else %}
                                     {% for db_type in database_types %}
-                                        {% if db_type == 'MongoDB' %}
-                                            <span class="badge bg-success me-1">MongoDB</span>
-                                        {% elif db_type == 'PostgreSQL' %}
-                                            <span class="badge bg-primary me-1">PostgreSQL</span>
-                                        {% elif db_type == 'MySQL' %}
-                                            <span class="badge bg-warning text-dark me-1">MySQL</span>
-                                        {% else %}
-                                            <span class="badge bg-info me-1">{{ db_type }}</span>
+                                        {% if db_type.strip() %}
+                                            <span class="badge bg-success me-1 mb-1">{{ db_type.strip() }}</span>
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
-                            {% else %}
-                                <span class="text-muted">No database types selected</span>
                             {% endif %}
                         </div>
-                        
-                        {% if database_review_required %}
-                            <p class="text-muted small mb-3"><strong>Required because:</strong> Database technologies ({{ database_types|join(', ') }}) or storage systems detected</p>
-                        {% else %}
-                            <p class="text-muted small mb-3"><strong>Not required:</strong> No database technologies or storage systems detected</p>
-                        {% endif %}
 
                         {% if database_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -276,16 +299,16 @@
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
-                    </div>
-                </div>
-            </div>
+                                </div>
+                            </div>
+                                </div>
             {% endif %}
 
             <!-- Infrastructure Review Category -->
             {% if infrastructure_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header bg-warning text-white border-0">
+                    <div class="card-header text-white border-0" style="background: linear-gradient(135deg, #007bff, #0056b3);">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-server fa-lg me-3"></i>
                             <div>
@@ -296,7 +319,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-light text-dark">16 questions</span>
+                            <span class="badge bg-light text-dark">{{ infrastructure_review_questions }} questions</span>
                             {% if infrastructure_review_required %}
                                 {% if infrastructure_review_completed %}
                                     <span class="badge bg-success">Completed</span>
@@ -308,17 +331,13 @@
                             {% endif %}
                         </div>
                         
+                        <p class="text-muted small mb-3">Comprehensive security assessment for infrastructure and container technologies</p>
+                        
                         <div class="mb-3">
                             {% for tech in container_tech %}
-                                <span class="badge bg-secondary me-1">{{ tech }}</span>
+                                <span class="badge me-1 mb-1" style="background: #007bff;">{{ tech }}</span>
                             {% endfor %}
                         </div>
-                        
-                        {% if infrastructure_review_required %}
-                            <p class="text-muted small mb-3"><strong>Required because:</strong> Container technologies (Docker, Kubernetes) or microservices architecture detected</p>
-                        {% else %}
-                            <p class="text-muted small mb-3"><strong>Not required:</strong> No container technologies or microservices detected</p>
-                        {% endif %}
 
                         {% if infrastructure_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -333,11 +352,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif infrastructure_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-warning w-100">
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #007bff, #0056b3);">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-warning w-100">
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #007bff, #0056b3);">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -350,7 +369,7 @@
             {% if compliance_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header bg-danger text-white border-0">
+                    <div class="card-header text-white border-0" style="background: linear-gradient(135deg, #17a2b8, #138496);">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-shield-alt fa-lg me-3"></i>
                             <div>
@@ -361,7 +380,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-light text-dark">18 questions</span>
+                            <span class="badge bg-light text-dark">{{ compliance_review_questions }} questions</span>
                             {% if compliance_review_required %}
                                 {% if compliance_review_completed %}
                                     <span class="badge bg-success">Completed</span>
@@ -372,18 +391,14 @@
                                 <span class="badge bg-secondary">Not Required</span>
                             {% endif %}
                         </div>
-                        
+
+                        <p class="text-muted small mb-3">Comprehensive security assessment for regulatory compliance and data protection</p>
+
                         <div class="mb-3">
                             {% for comp in compliance %}
-                                <span class="badge bg-danger me-1">{{ comp }}</span>
+                                <span class="badge me-1 mb-1" style="background: #17a2b8;">{{ comp }}</span>
                             {% endfor %}
                         </div>
-                        
-                        {% if compliance_review_required %}
-                            <p class="text-muted small mb-3"><strong>Required because:</strong> Compliance standards ({{ compliance|join(', ') }}) or sensitive data types ({{ data_types|join(', ') }}) detected</p>
-                        {% else %}
-                            <p class="text-muted small mb-3"><strong>Not required:</strong> No compliance standards or sensitive data types detected</p>
-                        {% endif %}
 
                         {% if compliance_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -398,11 +413,11 @@
                                 <i class="fas fa-user-tie"></i> Pending Analyst Review
                             </button>
                         {% elif compliance_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn btn-danger w-100">
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #17a2b8, #138496);">
                                 <i class="fas fa-edit"></i> Continue Compliance Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn btn-danger w-100">
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #17a2b8, #138496);">
                                 <i class="fas fa-play"></i> Start Compliance Review
                             </a>
                         {% endif %}
@@ -415,7 +430,7 @@
             {% if api_review_required %}
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header bg-dark text-white border-0">
+                    <div class="card-header text-white border-0" style="background: linear-gradient(135deg, #6c757d, #495057);">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-code fa-lg me-3"></i>
                             <div>
@@ -426,7 +441,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-light text-dark">16 questions</span>
+                            <span class="badge bg-light text-dark">{{ api_review_questions }} questions</span>
                             {% if api_review_required %}
                                 {% if api_review_completed %}
                                     <span class="badge bg-success">Completed</span>
@@ -438,17 +453,13 @@
                             {% endif %}
                         </div>
                         
+                        <p class="text-muted small mb-3">Comprehensive security assessment for API endpoints and microservices</p>
+                        
                         <div class="mb-3">
                             {% for auth in auth_services %}
-                                <span class="badge bg-dark me-1">{{ auth }}</span>
+                                <span class="badge me-1 mb-1" style="background: #6c757d;">{{ auth }}</span>
                             {% endfor %}
                         </div>
-                        
-                        {% if api_review_required %}
-                            <p class="text-muted small mb-3"><strong>Required because:</strong> API services ({{ auth_services|join(', ') }}) or microservices architecture detected</p>
-                        {% else %}
-                            <p class="text-muted small mb-3"><strong>Not required:</strong> No API services or microservices detected</p>
-                        {% endif %}
 
                         {% if api_review_status == 'completed' %}
                             <button class="btn btn-outline-success w-100" disabled>
@@ -463,11 +474,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif api_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-dark w-100">
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #6c757d, #495057);">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-dark w-100">
+                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #6c757d, #495057);">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -624,5 +635,14 @@ function submitForReview(reviewType) {
         });
     }
 }
+
+// Set progress bar width from data attribute
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBar = document.querySelector('.progress-bar[data-width]');
+    if (progressBar) {
+        const width = progressBar.getAttribute('data-width');
+        progressBar.style.width = width + '%';
+    }
+});
 </script>
 {% endblock %} 
