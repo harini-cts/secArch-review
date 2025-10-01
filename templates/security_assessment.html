@@ -137,7 +137,7 @@
                                 <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif app_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-outline-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/application_review" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif app_review_status == 'pending_analyst' %}
@@ -145,11 +145,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif app_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/application_review" class="btn btn-primary w-100">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='application_review') }}" class="btn btn-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/application_review" class="btn btn-primary w-100">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -210,7 +210,7 @@
                                 <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif cloud_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-outline-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/cloud_review" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif cloud_review_status == 'pending_analyst' %}
@@ -218,11 +218,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif cloud_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-info w-100">
+                            <a href="/questionnaire/{{ application.id }}/cloud_review" class="btn btn-info w-100">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='cloud_review') }}" class="btn btn-info w-100">
+                            <a href="/questionnaire/{{ application.id }}/cloud_review" class="btn btn-info w-100">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -283,7 +283,7 @@
                                 <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif database_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-outline-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/database_review" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif database_review_status == 'pending_analyst' %}
@@ -291,11 +291,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif database_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-success w-100">
+                            <a href="/questionnaire/{{ application.id }}/database_review" class="btn btn-success w-100">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='database_review') }}" class="btn btn-success w-100">
+                            <a href="/questionnaire/{{ application.id }}/database_review" class="btn btn-success w-100">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -344,7 +344,7 @@
                                 <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif infrastructure_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn btn-outline-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/infrastructure_review" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif infrastructure_review_status == 'pending_analyst' %}
@@ -352,11 +352,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif infrastructure_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+                            <a href="/questionnaire/{{ application.id }}/infrastructure_review" class="btn w-100 text-white" style="background: linear-gradient(135deg, #007bff, #0056b3);">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='infrastructure_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+                            <a href="/questionnaire/{{ application.id }}/infrastructure_review" class="btn w-100 text-white" style="background: linear-gradient(135deg, #007bff, #0056b3);">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -405,7 +405,7 @@
                                 <i class="fas fa-check"></i> Review Completed
                             </button>
                         {% elif compliance_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn btn-outline-success w-100">
+                            <a href="/questionnaire/{{ application.id }}/compliance_review" class="btn btn-outline-success w-100">
                                 <i class="fas fa-eye"></i> View Submitted Answers
                             </a>
                         {% elif compliance_review_status == 'pending_analyst' %}
@@ -413,11 +413,11 @@
                                 <i class="fas fa-user-tie"></i> Pending Analyst Review
                             </button>
                         {% elif compliance_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                            <a href="/questionnaire/{{ application.id }}/compliance_review" class="btn w-100 text-white" style="background: linear-gradient(135deg, #17a2b8, #138496);">
                                 <i class="fas fa-edit"></i> Continue Compliance Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='compliance_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                            <a href="/questionnaire/{{ application.id }}/compliance_review" class="btn w-100 text-white" style="background: linear-gradient(135deg, #17a2b8, #138496);">
                                 <i class="fas fa-play"></i> Start Compliance Review
                             </a>
                         {% endif %}
@@ -466,7 +466,7 @@
                                 <i class="fas fa-check"></i> Completed
                             </button>
                         {% elif api_review_status == 'submitted' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn btn-outline-primary w-100">
+                            <a href="/questionnaire/{{ application.id }}/api_review" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-eye"></i> View Answers
                             </a>
                         {% elif api_review_status == 'pending_analyst' %}
@@ -474,11 +474,11 @@
                                 <i class="fas fa-clock"></i> Under Review
                             </button>
                         {% elif api_review_status == 'draft' %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #6c757d, #495057);">
+                            <a href="/questionnaire/{{ application.id }}/api_review" class="btn w-100 text-white" style="background: linear-gradient(135deg, #6c757d, #495057);">
                                 <i class="fas fa-play"></i> Continue Review
                             </a>
                         {% else %}
-                            <a href="{{ url_for('web_questionnaire', app_id=application.id, field='api_review') }}" class="btn w-100 text-white" style="background: linear-gradient(135deg, #6c757d, #495057);">
+                            <a href="/questionnaire/{{ application.id }}/api_review" class="btn w-100 text-white" style="background: linear-gradient(135deg, #6c757d, #495057);">
                                 <i class="fas fa-play"></i> Start Review
                             </a>
                         {% endif %}
@@ -504,7 +504,7 @@
                 {% if api_review_required and api_review_status == 'completed' %}{{ completed_reviews.append('API Review') or '' }}{% endif %}
                 {{ completed_reviews|join(', ') }} completed.
             </p>
-            <a href="{{ url_for('web_review_results', app_id=application.id) }}" class="btn btn-success btn-lg">
+            <a href="/review-results/{{ application.id }}" class="btn btn-success btn-lg">
                 <i class="fas fa-chart-line"></i> View Security Report
             </a>
         </div>
@@ -557,7 +557,7 @@
 
         <!-- Action Buttons -->
         <div class="text-center mt-4">
-            <a href="{{ url_for('web_applications') }}" class="btn btn-secondary">
+            <a href="/applications" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Applications
             </a>
         </div>

@@ -628,7 +628,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--primary-color);">
         <div class="container">
-                <a class="navbar-brand" href="{{ url_for('enhanced_dashboard') }}">
+                <a class="navbar-brand" href="{{ url_for('dashboard') }}">
                 <img src="{{ url_for('static', filename='images/cognizant_logo.png') }}" alt="Cognizant Logo" class="img-fluid">
                 SecArch Portal
             </a>
@@ -648,10 +648,24 @@
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                             {% else %}
-                            <a class="nav-link" href="{{ url_for('enhanced_dashboard') }}">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                             {% endif %}
+                        </li>
+                        
+                        <!-- Applications Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('applications') }}">
+                                <i class="fas fa-laptop-code"></i> Applications
+                            </a>
+                        </li>
+                        
+                        <!-- Reviews Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('results') }}">
+                                <i class="fas fa-chart-line"></i> Reviews
+                            </a>
                         </li>
                         
                         <!-- Reviews Tab (for analysts and admins) -->
@@ -741,6 +755,36 @@
                     {% if session.user_id %}
                     <!-- Notifications Dropdown -->
                     <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge" style="display: none;">
+                                0
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-bell"></i> Notifications</span>
+                                <button class="btn btn-link btn-sm text-decoration-none" id="markAllRead" style="font-size: 0.8rem;">
+                                    Mark all read
+                                </button>
+                            </div>
+                            <div id="notificationsList">
+                                <div class="text-center p-3 text-muted">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <!-- Live Chat Modal Trigger -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#chatModal" title="Live Chat">
+                            <i class="fas fa-comment"></i>
+                        </a>
+                    </li>
+                    
+                    <!-- Notifications Dropdown (Hidden) -->
+                    <li class="nav-item dropdown" style="display: none;">
                         <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown">
                             <i class="fas fa-bell"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge" style="display: none;">
@@ -1129,12 +1173,327 @@
             }
         }
     });
+    
+    // Initialize Socket.IO connection
+    const socket = io();
+
+    // Format time to India timezone
+    function formatIndiaTime(dateString) {
+        if (!dateString) return 'N/A';
+        
+        try {
+            // If the date string already includes IST, return as is
+            if (dateString.includes('IST')) {
+                return dateString;
+            }
+            
+            // Parse the date and convert to India timezone
+            const date = new Date(dateString);
+            return date.toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }) + ' IST';
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return dateString;
+        }
+    }
+
+    // Load notifications
+    function loadNotifications() {
+        fetch('/api/notifications')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayNotifications(data.notifications);
+                    updateNotificationBadge(data.notifications.filter(n => !n.is_read).length);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationsList').innerHTML = 
+                    '<div class="text-center p-3 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading notifications</div>';
+            });
+    }
+
+    // Display notifications
+    function displayNotifications(notifications) {
+        const container = document.getElementById('notificationsList');
+        
+        if (notifications.length === 0) {
+            container.innerHTML = '<div class="text-center p-3 text-muted"><i class="fas fa-bell-slash me-2"></i>No notifications</div>';
+            return;
+        }
+        
+        const html = notifications.map(notif => `
+            <div class="d-flex align-items-start p-3 border-bottom ${notif.is_read ? 'bg-light' : 'bg-primary bg-opacity-10'}" data-notification-id="${notif.id}">
+                <div class="me-3">
+                    <i class="fas fa-${getNotificationIcon(notif.type)} text-${getNotificationColor(notif.type)}"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="mb-1">${notif.title}</h6>
+                    <p class="mb-1 small text-muted">${notif.message}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>${formatIndiaTime(notif.created_at)}
+                    </small>
+                </div>
+                ${!notif.is_read ? '<button class="btn btn-sm btn-outline-primary" onclick="markAsRead(\'' + notif.id + '\')">Mark Read</button>' : ''}
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    }
+
+    // Get notification icon based on type
+    function getNotificationIcon(type) {
+        const icons = {
+            'info': 'info-circle',
+            'success': 'check-circle',
+            'warning': 'exclamation-triangle',
+            'error': 'times-circle',
+            'default': 'bell'
+        };
+        return icons[type] || icons.default;
+    }
+
+    // Get notification color based on type
+    function getNotificationColor(type) {
+        const colors = {
+            'info': 'primary',
+            'success': 'success',
+            'warning': 'warning',
+            'error': 'danger',
+            'default': 'secondary'
+        };
+        return colors[type] || colors.default;
+    }
+
+    // Update notification badge
+    function updateNotificationBadge(count) {
+        const badge = document.getElementById('notificationBadge');
+        if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // Mark notification as read
+    function markAsRead(notificationId) {
+        fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadNotifications(); // Refresh notifications
+            }
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+        });
+    }
+
+    // Load chat messages
+    function loadChatMessages() {
+        console.log('Loading chat messages...');
+        fetch('/api/chat/messages')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Chat messages response:', data);
+                if (data.success) {
+                    displayChatMessages(data.messages);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading chat messages:', error);
+                document.getElementById('chatMessages').innerHTML = 
+                    '<div class="text-center p-3 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error loading messages</div>';
+            });
+    }
+
+    // Display chat messages
+    function displayChatMessages(messages) {
+        console.log('Displaying chat messages:', messages);
+        const container = document.getElementById('chatMessages');
+        
+        if (!container) {
+            console.error('Chat messages container not found!');
+            return;
+        }
+        
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="text-center p-3 text-muted"><i class="fas fa-comment-slash me-2"></i>No messages yet</div>';
+            return;
+        }
+        
+        const html = messages.reverse().map(msg => `
+            <div class="d-flex align-items-start mb-3">
+                <div class="me-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-primary">${msg.user_name}</strong>
+                        <small class="text-muted">${formatIndiaTime(msg.created_at)}</small>
+                    </div>
+                    <p class="mb-0">${msg.message}</p>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+        console.log('Chat messages displayed successfully');
+    }
+
+    // Send chat message
+    function sendChatMessage() {
+        console.log('Sending chat message...');
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        
+        console.log('Message to send:', message);
+        
+        if (!message) {
+            console.log('Empty message, not sending');
+            return;
+        }
+        
+        fetch('/api/chat/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Send message response:', data);
+            if (data.success) {
+                input.value = '';
+                loadChatMessages(); // Refresh messages
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+        });
+    }
+
+    // Socket.IO event listeners
+    socket.on('connect', function() {
+        console.log('Connected to real-time server');
+    });
+
+    socket.on('new_notification', function(data) {
+        console.log('New notification received:', data);
+        loadNotifications(); // Refresh notifications
+    });
+
+    socket.on('new_chat_message', function(data) {
+        console.log('New chat message received:', data);
+        loadChatMessages(); // Refresh messages
+    });
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, setting up event listeners...');
+        loadNotifications();
+        
+        // Chat modal event listeners
+        const chatModal = document.getElementById('chatModal');
+        console.log('Chat modal element:', chatModal);
+        if (chatModal) {
+            chatModal.addEventListener('shown.bs.modal', function() {
+                console.log('Chat modal opened, loading messages...');
+                loadChatMessages();
+            });
+        } else {
+            console.error('Chat modal not found!');
+        }
+        
+        // Send message on button click
+        const sendBtn = document.getElementById('sendChatBtn');
+        console.log('Send button element:', sendBtn);
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function() {
+                console.log('Send button clicked');
+                sendChatMessage();
+            });
+        } else {
+            console.error('Send button not found!');
+        }
+        
+        // Send message on Enter key
+        const chatInput = document.getElementById('chatInput');
+        console.log('Chat input element:', chatInput);
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    console.log('Enter key pressed in chat input');
+                    sendChatMessage();
+                }
+            });
+        } else {
+            console.error('Chat input not found!');
+        }
+        
+        // Mark all as read
+        const markAllRead = document.getElementById('markAllRead');
+        if (markAllRead) {
+            markAllRead.addEventListener('click', function() {
+                // Implementation for marking all as read
+                alert('Mark all as read feature coming soon!');
+            });
+        }
+    });
     </script>
     
     <!-- WebSocket Support for Real-time Features -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/realtime.js') }}"></script>
     
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="chatModalLabel">
+                        <i class="fas fa-comments me-2"></i>Live Chat
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="chatMessages" style="height: 400px; overflow-y: auto; padding: 15px;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i> Loading messages...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chatInput" placeholder="Type your message..." maxlength="500">
+                        <button class="btn btn-primary" type="button" id="sendChatBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

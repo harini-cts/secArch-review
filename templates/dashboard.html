@@ -4,20 +4,6 @@
 
 {% block content %}
 <div class="content-area">
-    <div class="row mb-4">
-        <div class="col-12">
-            {% if role == 'admin' %}
-                <h2><i class="fas fa-cogs text-danger"></i> Admin Dashboard</h2>
-                <p class="text-muted">System-wide oversight and management</p>
-            {% elif role == 'security_analyst' %}
-                <h2><i class="fas fa-microscope text-warning"></i> Analyst Dashboard</h2>
-                <p class="text-muted">Review and analyze security assessments using STRIDE methodology</p>
-            {% else %}
-                <h2><i class="fas fa-shield-alt text-primary"></i> Security Dashboard</h2>
-                <p class="text-muted">Welcome back, {{ session.user_name }}! Manage your security assessments here.</p>
-            {% endif %}
-        </div>
-    </div>
 
     {% if role == 'admin' %}
         <!-- Admin Dashboard Content -->
@@ -667,32 +653,6 @@
         </style>
 
         <div class="container-fluid py-4" style="background-color: #f5f7fa;">
-            <!-- Cognizant Security Dashboard Header -->
-            <div class="cognizant-header">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h1 class="mb-2" style="font-weight: 700; font-size: 2.8rem;">
-                            <i class="fas fa-shield-alt me-3"></i>Security Dashboard
-                        </h1>
-                        <p class="mb-0" style="font-size: 1.2rem; opacity: 0.9;">
-                            Welcome back, {{ session.get('user_name', 'John User') }}!
-                        </p>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <!-- Quick Stats in Header -->
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <div class="h3 mb-0" style="font-weight: 700;">{{ app_stats.total or 7 }}</div>
-                                <small style="opacity: 0.8;">Applications</small>
-                            </div>
-                            <div class="col-6">
-                                <div class="h3 mb-0" style="font-weight: 700;">{{ (app_stats.submitted or 0) + (app_stats.in_review or 0) + (app_stats.completed or 0) or 9 }}</div>
-                                <small style="opacity: 0.8;">Reviews</small>
-                </div>
-            </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Quick Actions Section -->
             <div class="quick-actions-card">
@@ -740,9 +700,9 @@
                 <div class="table-header px-4 py-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0" style="color: #333; font-weight: 600;">
-                            <i class="fas fa-apps text-primary me-2"></i>My Applications
+                            <i class="fas fa-clock text-primary me-2"></i>Recent Applications
                         </h4>
-                        <span class="cognizant-badge">{{ applications|length if applications else 0 }} Applications</span>
+                        <span class="cognizant-badge">{{ applications|length if applications else 0 }} Recent Applications</span>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -750,7 +710,7 @@
                         <thead style="background-color: #f8f9fa;">
                             <tr>
                                 <th class="border-0 px-4 py-3" style="color: #555; font-weight: 600;">Application Name</th>
-                                <th class="border-0 px-4 py-3" style="color: #555; font-weight: 600;">Technology Stack</th>
+                                <th class="border-0 px-4 py-3" style="color: #555; font-weight: 600;">Reviews</th>
                                 <th class="border-0 px-4 py-3" style="color: #555; font-weight: 600;">Business Criticality</th>
                                 <th class="border-0 px-4 py-3" style="color: #555; font-weight: 600;">Status</th>
                                 <th class="border-0 px-4 py-3" style="color: #555; font-weight: 600;">Last Updated</th>
@@ -768,16 +728,18 @@
                             </div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        {% if app.technology_stack %}
-                                            {% for tech in app.technology_stack.split(',')[:2] %}
-                                            <span class="badge bg-light text-dark border me-1">{{ tech.strip() }}</span>
-                                            {% endfor %}
-                                            {% if app.technology_stack.split(',')|length > 2 %}
-                                            <span class="badge bg-secondary">+{{ app.technology_stack.split(',')|length - 2 }}</span>
-                                            {% endif %}
-                                        {% else %}
-                                        <span class="text-muted">Not specified</span>
-                                        {% endif %}
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-2">
+                                                <i class="fas fa-clipboard-check me-1"></i>{{ app.review_count or 0 }}
+                                            </span>
+                                            <small class="text-muted">
+                                                {% if app.review_count == 1 %}
+                                                    1 review
+                                                {% elif app.review_count > 1 %}
+                                                    {{ app.review_count }} reviews
+                                                {% endif %}
+                                            </small>
+                                        </div>
                                     </td>
                                     <td class="px-4 py-3">
                                         <span class="badge {% if app.business_criticality == 'Critical' %}bg-danger{% elif app.business_criticality == 'High' %}bg-warning text-dark{% elif app.business_criticality == 'Medium' %}bg-info text-white{% else %}bg-success{% endif %} px-3 py-2">
@@ -811,7 +773,7 @@
                                             <a href="/security-assessment/{{ app.id }}" class="btn btn-sm btn-outline-warning" title="Being Reviewed by Security Analyst">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            {% elif app.has_draft_review > 0 %}
+                                            {% elif app.status == 'draft' %}
                                             <a href="/security-assessment/{{ app.id }}" class="btn btn-sm btn-success" title="Continue Assessment - Resume where you left off" style="background: #28a745; border-color: #28a745;">
                                                 <i class="fas fa-play-circle"></i>
                                             </a>
@@ -890,4 +852,5 @@
     transform: translateY(-2px);
 }
 </style>
+
 {% endblock %} 

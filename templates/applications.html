@@ -1,189 +1,145 @@
 {% extends "base.html" %}
 
-{% block title %}Applications - Cognizant SecArch Portal{% endblock %}
+{% block title %}Applications - SecureArch Portal{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold" style="color: #212529; font-size: 2rem;"><i class="fas fa-laptop-code text-primary me-3"></i> My Applications</h2>
-            {% if session.user_role == 'user' %}
-            <a href="{{ url_for('web_create_application') }}" class="btn btn-primary btn-lg fw-medium" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px 24px;">
-                <i class="fas fa-plus me-2"></i> Add New Application
-            </a>
-            {% endif %}
+<div class="content-area">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-laptop-code text-primary"></i> My Applications</h2>
+            <p class="text-muted">Manage your security assessment applications</p>
         </div>
-
-        {% if applications %}
-        <div class="row">
-            {% for app in applications %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm" style="border: 2px solid #e9ecef;">
-                    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
-                        <h5 class="mb-0 fw-bold" style="color: #212529; font-size: 1.2rem;">{{ app.name }}</h5>
-                        <div class="d-flex gap-2">
-                            <!-- Application Status -->
-                            {% if app.status == 'draft' %}
-                            <span class="badge bg-secondary"><i class="fas fa-edit"></i> Draft</span>
-                            {% elif app.status == 'submitted' %}
-                            <span class="badge bg-warning"><i class="fas fa-clock"></i> Awaiting Review</span>
-                            {% elif app.status == 'in_review' %}
-                            <span class="badge bg-primary"><i class="fas fa-search"></i> Under Review</span>
-                            {% elif app.status == 'completed' %}
-                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Completed</span>
-                            {% elif app.status == 'rejected' %}
-                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Needs Revision</span>
-                            {% else %}
-                            <span class="badge bg-info"><i class="fas fa-question-circle"></i> {{ app.status|title }}</span>
-                            {% endif %}
-                            
-                            <!-- Security Level (if available) -->
-                            {% if app.review_status and app.risk_score %}
-                                {% if app.risk_score <= 1.5 %}
-                                    <span class="badge bg-outline-success border">High Security</span>
-                                {% elif app.risk_score <= 2.5 %}
-                                    <span class="badge bg-outline-warning border">Medium Security</span>
-                                {% else %}
-                                    <span class="badge bg-outline-danger border">Low Security</span>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="card-body" style="background: #ffffff;">
-                        <p class="card-text fw-medium" style="color: #495057; line-height: 1.5;">{{ app.description[:100] }}{% if app.description|length > 100 %}...{% endif %}</p>
-                        
-                        <div class="mb-3">
-                            <div class="row g-2">
-                                <div class="col-12">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="fas fa-code text-primary me-2"></i>
-                                        <strong style="color: #212529;">Technology:</strong>
-                                        <span class="ms-2 fw-medium" style="color: #495057;">{{ app.technology_stack }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="fas fa-server text-info me-2"></i>
-                                        <strong style="color: #212529;">Environment:</strong>
-                                        <span class="ms-2 fw-medium" style="color: #495057;">{{ app.deployment_environment }}</span>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                                        <strong style="color: #212529;">Criticality:</strong>
-                                        <span class="ms-2 fw-medium" style="color: #495057;">{{ app.business_criticality }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-                    <div class="card-footer" style="background: #f8f9fa; border-top: 1px solid #dee2e6;">
-                        <div class="d-flex gap-2 mb-2">
-                            {% if app.status == 'completed' and app.review_status %}
-                                <a href="{{ url_for('web_review_results', app_id=app.id) }}" class="btn btn-primary btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
-                                    <i class="fas fa-chart-line me-1"></i> View Results
-                                </a>
-                            {% elif app.status == 'draft' %}
-                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-success btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
-                                    <i class="fas fa-clipboard-check me-1"></i> Start Assessment
-                                </a>
-                            {% elif app.status == 'submitted' %}
-                                <span class="btn btn-warning btn-sm flex-fill disabled fw-medium" style="font-size: 0.9rem;">
-                                    <i class="fas fa-clock me-1"></i> Awaiting Review
-                                </span>
-                            {% elif app.status == 'in_review' %}
-                                <span class="btn btn-info btn-sm flex-fill disabled fw-medium" style="font-size: 0.9rem;">
-                                    <i class="fas fa-search me-1"></i> Under Review
-                                </span>
-                            {% elif app.status == 'rejected' %}
-                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-warning btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
-                                    <i class="fas fa-edit me-1"></i> Revise & Resubmit
-                                </a>
-                            {% else %}
-                                <a href="{{ url_for('web_security_assessment', app_id=app.id) }}" class="btn btn-success btn-sm flex-fill fw-medium" style="font-size: 0.9rem;">
-                                    <i class="fas fa-clipboard-check me-1"></i> Continue Assessment
-                                </a>
-                            {% endif %}
-                            {% if app.status == 'draft' %}
-                            <button class="btn btn-outline-secondary btn-sm fw-medium" onclick="editApplication('{{ app.id }}')" style="font-size: 0.9rem;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            {% endif %}
-                        </div>
-                        {% if app.status in ['draft', 'rejected'] %}
-                        <button class="btn btn-danger btn-sm w-100 fw-medium" onclick="deleteApplication('{{ app.id }}', '{{ app.name }}')" style="font-size: 0.9rem;">
-                            <i class="fas fa-trash me-1"></i> Delete Application
-                        </button>
-                        {% endif %}
-                    </div>
+    </div>
+    
+    <!-- Applications Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ app_stats.total or 0 }}</h4>
+                    <small>Total Applications</small>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <div class="text-center py-5">
-            <div class="mb-4">
-                <i class="fas fa-laptop-code fa-5x text-primary" style="opacity: 0.8;"></i>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ app_stats.completed or 0 }}</h4>
+                    <small>Completed</small>
+                </div>
             </div>
-            {% if session.user_role == 'admin' %}
-            <h4 class="fw-bold mb-3" style="color: #212529; font-size: 1.5rem;">No Applications Available</h4>
-            <p class="text-muted mb-4" style="font-size: 1.1rem; color: #6c757d;">Applications submitted by users will appear here for administrative oversight.</p>
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-lg fw-medium" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px 24px;">
-                <i class="fas fa-chart-line me-2"></i> Go to Admin Dashboard
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ app_stats.in_review or 0 }}</h4>
+                    <small>In Review</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ app_stats.draft or 0 }}</h4>
+                    <small>Draft</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Applications List -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Applications</h5>
+            <a href="/create-application" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i>New Application
             </a>
+        </div>
+        <div class="card-body">
+            {% if applications and applications|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Application Name</th>
+                                <th>Technology Stack</th>
+                                <th>Business Criticality</th>
+                                <th>Status</th>
+                                <th>Reviews</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr>
+                                <td>
+                                    <div>
+                                        <h6 class="mb-1">{{ app.name }}</h6>
+                                        <small class="text-muted">{{ app.description[:50] }}{% if app.description|length > 50 %}...{% endif %}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if app.technology_stack %}
+                                        <span class="badge bg-primary">{{ app.technology_stack }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Not specified</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge {% if app.business_criticality == 'High' %}bg-danger{% elif app.business_criticality == 'Medium' %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ app.business_criticality or 'Medium' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if app.status == 'completed' %}bg-success{% elif app.status == 'in_review' %}bg-warning{% elif app.status == 'submitted' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ app.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ app.review_count or 0 }}</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ app.created_at[:10] if app.created_at else 'N/A' }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/applications/{{ app.id }}" class="btn btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/security-assessment/{{ app.id }}" class="btn btn-outline-success" title="Security Assessment">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </a>
+                                        {% if app.status == 'completed' %}
+                                        <a href="/review-results/{{ app.id }}" class="btn btn-outline-info" title="View Results">
+                                            <i class="fas fa-chart-line"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% else %}
-            <h4 class="fw-bold mb-3" style="color: #212529; font-size: 1.5rem;">No Applications Yet</h4>
-            <p class="text-muted mb-4" style="font-size: 1.1rem; color: #6c757d;">Get started by adding your first application for security review.</p>
-            <a href="{{ url_for('web_create_application') }}" class="btn btn-primary btn-lg fw-medium" style="background: linear-gradient(135deg, #007bff, #0056b3); border: none; padding: 12px 24px;">
-                <i class="fas fa-plus me-2"></i> Add Your First Application
-            </a>
+                <div class="text-center py-5">
+                    <i class="fas fa-laptop-code fa-4x text-muted mb-3"></i>
+                    <h4>No Applications Yet</h4>
+                    <p class="text-muted">You haven't created any applications yet. Start by creating your first security assessment.</p>
+                    <a href="/create-application" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create First Application
+                    </a>
+                </div>
             {% endif %}
         </div>
-        {% endif %}
+    </div>
+    
+    <!-- Back to Dashboard -->
+    <div class="text-center mt-4">
+        <a href="/dashboard" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
     </div>
 </div>
-
-<script>
-function editApplication(appId) {
-    window.location.href = '/edit-application/' + appId;
-}
-
-function deleteApplication(appId, appName) {
-    // Show confirmation dialog
-    if (confirm(`Are you sure you want to delete the application "${appName}"?\n\nThis will permanently delete:\n• The application\n• All security reviews\n• All STRIDE analysis\n• All uploaded files\n\nThis action cannot be undone.`)) {
-        // Show loading state
-        const deleteBtn = event.target.closest('button');
-        const originalContent = deleteBtn.innerHTML;
-        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
-        deleteBtn.disabled = true;
-        
-        // Send delete request
-        fetch(`/delete-application/${appId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                // Success - reload page to refresh the list
-                window.location.reload();
-            } else {
-                return response.json().then(data => {
-                    throw new Error(data.error || 'Failed to delete application');
-                });
-            }
-        })
-        .catch(error => {
-            // Reset button and show error
-            deleteBtn.innerHTML = originalContent;
-            deleteBtn.disabled = false;
-            alert('Error deleting application: ' + error.message);
-        });
-    }
-}
-</script>
-{% endblock %} 
+{% endblock %}

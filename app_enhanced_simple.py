@@ -13,6 +13,7 @@ from app.security import login_required, role_required
 from datetime import datetime
 import json
 import uuid
+import pytz
 import logging
 import os
 
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
+app.config['TIMEZONE'] = 'Asia/Kolkata'
 
 # Initialize SocketIO for real-time communication
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -30,6 +32,26 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Initialize database
 with app.app_context():
     init_db()
+
+# Timezone configuration
+IST = pytz.timezone('Asia/Kolkata')
+
+def get_india_time():
+    """Get current time in India timezone"""
+    return datetime.now(IST)
+
+def format_india_time(dt_string):
+    """Format datetime string to India timezone"""
+    if not dt_string:
+        return None
+    try:
+        # Parse the datetime string
+        dt = datetime.fromisoformat(dt_string.replace('Z', '+00:00'))
+        # Convert to IST
+        ist_dt = dt.astimezone(IST)
+        return ist_dt.strftime('%Y-%m-%d %H:%M:%S IST')
+    except:
+        return dt_string
 
 # WebSocket event handlers
 @socketio.on('connect')
@@ -93,7 +115,7 @@ def login():
             session['user_name'] = f"{user['first_name']} {user['last_name']}"
             session['role'] = user['role']
             flash('Logged in successfully!', 'success')
-            return redirect(url_for('enhanced_dashboard'))
+            return redirect(url_for('dashboard'))
         else:
             flash('Invalid email or password.', 'error')
     
@@ -112,10 +134,437 @@ def register():
     flash('Registration is currently disabled. Please contact your administrator.', 'info')
     return redirect(url_for('login'))
 
-@app.route('/enhanced-dashboard')
-def enhanced_dashboard():
-    """Enhanced dashboard with real-time features"""
-    return render_template('enhanced_dashboard_simple.html', 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    """Dashboard showing recent applications (last 2)"""
+    # Get user stats and recent applications
+    conn = get_db()
+    
+    # Get all user applications for stats
+    all_applications_raw = conn.execute('''
+        SELECT a.id, a.name, a.description, a.technology_stack, a.business_criticality, 
+               a.status, a.created_at, a.assigned_analyst_id,
+               COUNT(sr.id) as review_count
+        FROM applications a
+        LEFT JOIN security_reviews sr ON a.id = sr.application_id
+        WHERE a.author_id = ?
+        GROUP BY a.id, a.name, a.description, a.technology_stack, a.business_criticality, 
+                 a.status, a.created_at, a.assigned_analyst_id
+        ORDER BY a.created_at DESC
+    ''', (session['user_id'],)).fetchall()
+    
+    # Get recent applications (last 2)
+    recent_applications_raw = conn.execute('''
+        SELECT a.id, a.name, a.description, a.technology_stack, a.business_criticality, 
+               a.status, a.created_at, a.assigned_analyst_id,
+               COUNT(sr.id) as review_count
+        FROM applications a
+        LEFT JOIN security_reviews sr ON a.id = sr.application_id
+        WHERE a.author_id = ?
+        GROUP BY a.id, a.name, a.description, a.technology_stack, a.business_criticality, 
+                 a.status, a.created_at, a.assigned_analyst_id
+        ORDER BY a.created_at DESC
+        LIMIT 2
+    ''', (session['user_id'],)).fetchall()
+    conn.close()
+    
+    # Convert all applications to list of dictionaries for stats
+    all_applications = []
+    for app in all_applications_raw:
+        app_dict = dict(app)
+        app_dict['review_count'] = app_dict['review_count'] or 0
+        all_applications.append(app_dict)
+    
+    # Convert recent applications to list of dictionaries
+    recent_applications = []
+    for app in recent_applications_raw:
+        app_dict = dict(app)
+        app_dict['review_count'] = app_dict['review_count'] or 0
+        recent_applications.append(app_dict)
+    
+    # Get basic stats from all applications
+    app_stats = {
+        'total': len(all_applications),
+        'submitted': len([app for app in all_applications if app['status'] == 'submitted']),
+        'in_review': len([app for app in all_applications if app['status'] == 'in_review']),
+        'completed': len([app for app in all_applications if app['status'] == 'completed'])
+    }
+    
+    return render_template('dashboard.html', 
+                         applications=recent_applications,
+                         app_stats=app_stats,
+                         role=session.get('role', 'user'))
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    """User profile page"""
+    # Fetch user data from database
+    conn = get_db()
+    user = conn.execute('''
+        SELECT id, first_name, last_name, email, role, created_at
+        FROM users WHERE id = ?
+    ''', (session['user_id'],)).fetchone()
+    
+    # Get user stats
+    applications_count = conn.execute('''
+        SELECT COUNT(*) FROM applications WHERE author_id = ?
+    ''', (session['user_id'],)).fetchone()[0]
+    
+    reviews_count = conn.execute('''
+        SELECT COUNT(*) FROM security_reviews WHERE author_id = ?
+    ''', (session['user_id'],)).fetchone()[0]
+    
+    conn.close()
+    
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    stats = {
+        'applications': applications_count,
+        'reviews': reviews_count
+    }
+    
+    return render_template('profile.html', 
+                         user=dict(user),
+                         stats=stats,
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/edit-profile')
+@login_required
+def edit_profile():
+    """Edit profile page"""
+    # Fetch user data from database
+    conn = get_db()
+    user = conn.execute('''
+        SELECT id, first_name, last_name, email, role, created_at
+        FROM users WHERE id = ?
+    ''', (session['user_id'],)).fetchone()
+    conn.close()
+    
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('edit_profile.html', 
+                         user=dict(user),
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/change-password')
+@login_required
+def change_password():
+    """Change password page"""
+    return render_template('change_password.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/applications')
+@login_required
+def applications():
+    """Applications page - shows all user applications"""
+    # Fetch all user applications
+    conn = get_db()
+    applications_raw = conn.execute('''
+        SELECT a.id, a.name, a.description, a.technology_stack, a.business_criticality, 
+               a.status, a.created_at, a.assigned_analyst_id,
+               COUNT(sr.id) as review_count
+        FROM applications a
+        LEFT JOIN security_reviews sr ON a.id = sr.application_id
+        WHERE a.author_id = ?
+        GROUP BY a.id, a.name, a.description, a.technology_stack, a.business_criticality, 
+                 a.status, a.created_at, a.assigned_analyst_id
+        ORDER BY a.created_at DESC
+    ''', (session['user_id'],)).fetchall()
+    conn.close()
+    
+    # Convert to list of dictionaries
+    applications = []
+    for app in applications_raw:
+        app_dict = dict(app)
+        app_dict['review_count'] = app_dict['review_count'] or 0
+        applications.append(app_dict)
+    
+    # Get basic stats
+    app_stats = {
+        'total': len(applications),
+        'submitted': len([app for app in applications if app['status'] == 'submitted']),
+        'in_review': len([app for app in applications if app['status'] == 'in_review']),
+        'completed': len([app for app in applications if app['status'] == 'completed']),
+        'draft': len([app for app in applications if app['status'] == 'draft'])
+    }
+    
+    return render_template('applications.html', 
+                         applications=applications,
+                         app_stats=app_stats,
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/create-application')
+@login_required
+def create_application():
+    """Create application page - placeholder"""
+    return render_template('create_application.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/results')
+@login_required
+def results():
+    """Results page - placeholder"""
+    return render_template('results.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+# Admin routes
+@app.route('/admin/users')
+@login_required
+@role_required('admin')
+def admin_users():
+    """Admin users management - placeholder"""
+    return render_template('admin/users.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/admin/applications')
+@login_required
+@role_required('admin')
+def admin_applications():
+    """Admin applications management - placeholder"""
+    return render_template('admin/applications.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/admin/reports')
+@login_required
+@role_required('admin')
+def admin_reports():
+    """Admin reports - placeholder"""
+    return render_template('admin/reports.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+# Additional admin routes
+@app.route('/admin/dashboard')
+@login_required
+@role_required('admin')
+def admin_dashboard():
+    """Admin dashboard"""
+    return render_template('admin/dashboard.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/admin/settings')
+@login_required
+@role_required('admin')
+def admin_settings():
+    """Admin settings page"""
+    return render_template('admin/settings.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/admin/audit-logs')
+@login_required
+@role_required('admin')
+def admin_audit_logs():
+    """Admin audit logs page"""
+    return render_template('admin/audit_logs.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/admin/reviews')
+@login_required
+@role_required('admin')
+def admin_reviews():
+    """Admin reviews management page"""
+    return render_template('admin/reviews.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+# Application detail routes
+@app.route('/applications/<app_id>')
+@login_required
+def application_detail(app_id):
+    """Application detail page - placeholder"""
+    # Fetch application data
+    conn = get_db()
+    application = conn.execute('''
+        SELECT * FROM applications WHERE id = ? AND author_id = ?
+    ''', (app_id, session['user_id'])).fetchone()
+    conn.close()
+    
+    if not application:
+        flash('Application not found or access denied.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('edit_application.html', 
+                         application=dict(application),
+                         app_id=app_id,
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/security-assessment/<app_id>')
+@login_required
+def security_assessment(app_id):
+    """Security assessment page - placeholder"""
+    # Fetch application data
+    conn = get_db()
+    application = conn.execute('''
+        SELECT * FROM applications WHERE id = ? AND author_id = ?
+    ''', (app_id, session['user_id'])).fetchone()
+    conn.close()
+    
+    if not application:
+        flash('Application not found or access denied.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Set up review requirements and status
+    # For now, we'll set all reviews as required and not completed
+    # In a real implementation, this would check the database for actual review status
+    
+    # Review requirements (all reviews are required by default)
+    app_review_required = True
+    cloud_review_required = True
+    database_review_required = True
+    infrastructure_review_required = True
+    compliance_review_required = True
+    api_review_required = True
+    
+    # Review completion status (all set to not completed for now)
+    app_review_completed = False
+    cloud_review_completed = False
+    database_review_completed = False
+    infrastructure_review_completed = False
+    compliance_review_completed = False
+    api_review_completed = False
+    
+    # Review status (for display)
+    app_review_status = 'pending'
+    cloud_review_status = 'pending'
+    database_review_status = 'pending'
+    infrastructure_review_status = 'pending'
+    compliance_review_status = 'pending'
+    api_review_status = 'pending'
+    
+    return render_template('security_assessment.html', 
+                         application=dict(application),
+                         app_id=app_id,
+                         user_name=session.get('user_name'),
+                         role=session.get('role'),
+                         # Review requirements
+                         app_review_required=app_review_required,
+                         cloud_review_required=cloud_review_required,
+                         database_review_required=database_review_required,
+                         infrastructure_review_required=infrastructure_review_required,
+                         compliance_review_required=compliance_review_required,
+                         api_review_required=api_review_required,
+                         # Review completion status
+                         app_review_completed=app_review_completed,
+                         cloud_review_completed=cloud_review_completed,
+                         database_review_completed=database_review_completed,
+                         infrastructure_review_completed=infrastructure_review_completed,
+                         compliance_review_completed=compliance_review_completed,
+                         api_review_completed=api_review_completed,
+                         # Review status
+                         app_review_status=app_review_status,
+                         cloud_review_status=cloud_review_status,
+                         database_review_status=database_review_status,
+                         infrastructure_review_status=infrastructure_review_status,
+                         compliance_review_status=compliance_review_status,
+                         api_review_status=api_review_status)
+
+@app.route('/review-results/<app_id>')
+@login_required
+def review_results(app_id):
+    """Review results page - placeholder"""
+    # Fetch application data
+    conn = get_db()
+    application = conn.execute('''
+        SELECT * FROM applications WHERE id = ? AND author_id = ?
+    ''', (app_id, session['user_id'])).fetchone()
+    conn.close()
+    
+    if not application:
+        flash('Application not found or access denied.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Create a placeholder review object
+    review = {
+        'risk_score': None,
+        'status': 'pending',
+        'created_at': None,
+        'completed_at': None
+    }
+    
+    return render_template('review_results.html', 
+                         application=dict(application),
+                         review=review,
+                         app_id=app_id,
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+# Analyst routes
+@app.route('/analyst/reviews')
+@login_required
+@role_required('security_analyst', 'admin')
+def analyst_reviews():
+    """Analyst reviews page - placeholder"""
+    return render_template('analyst/reviews.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+@app.route('/analyst/review/<review_id>')
+@login_required
+@role_required('security_analyst', 'admin')
+def analyst_review_detail(review_id):
+    """Analyst review detail page - placeholder"""
+    return render_template('analyst/review_detail.html', 
+                         review_id=review_id,
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+# Additional analyst routes
+@app.route('/analyst/dashboard')
+@login_required
+@role_required('security_analyst', 'admin')
+def analyst_dashboard():
+    """Analyst dashboard"""
+    return render_template('analyst/dashboard.html', 
+                         user_name=session.get('user_name'),
+                         role=session.get('role'))
+
+# Questionnaire routes
+@app.route('/questionnaire/<app_id>/<review_type>')
+@login_required
+def questionnaire(app_id, review_type):
+    """Questionnaire page for different review types"""
+    # Validate review type
+    valid_types = ['application_review', 'cloud_review', 'database_review', 
+                   'infrastructure_review', 'compliance_review', 'api_review']
+    
+    if review_type not in valid_types:
+        flash('Invalid review type.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Fetch application data
+    conn = get_db()
+    application = conn.execute('''
+        SELECT * FROM applications WHERE id = ? AND author_id = ?
+    ''', (app_id, session['user_id'])).fetchone()
+    conn.close()
+    
+    if not application:
+        flash('Application not found or access denied.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('questionnaire.html', 
+                         application=dict(application),
+                         review_type=review_type,
+                         app_id=app_id,
                          user_name=session.get('user_name'),
                          role=session.get('role'))
 
@@ -271,6 +720,152 @@ def assign_analyst():
     }, room=f"app_{application_id}")
     
     return jsonify({'success': True, 'message': 'Analyst assigned successfully'})
+
+# New notification and chat endpoints
+@app.route('/api/notifications')
+@login_required
+def get_notifications():
+    """Get notifications for current user"""
+    try:
+        conn = get_db()
+        notifications = conn.execute('''
+            SELECT id, title, message, type, read_by, created_at, read_at
+            FROM notifications 
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            LIMIT 50
+        ''', (session['user_id'],)).fetchall()
+        conn.close()
+        
+        notifications_list = []
+        for notif in notifications:
+            # Check if current user has read this notification
+            read_by = notif['read_by'] or '[]'
+            try:
+                read_by_list = eval(read_by) if read_by else []
+                is_read = session['user_id'] in read_by_list
+            except:
+                is_read = False
+                
+        notifications_list.append({
+            'id': notif['id'],
+            'title': notif['title'],
+            'message': notif['message'],
+            'type': notif['type'],
+            'is_read': is_read,
+            'created_at': format_india_time(notif['created_at']),
+            'read_at': format_india_time(notif['read_at'])
+        })
+        
+        return jsonify({
+            'success': True,
+            'notifications': notifications_list
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/notifications/<notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    """Mark notification as read"""
+    try:
+        conn = get_db()
+        
+        # Get current read_by list
+        notification = conn.execute('''
+            SELECT read_by FROM notifications WHERE id = ? AND user_id = ?
+        ''', (notification_id, session['user_id'])).fetchone()
+        
+        if not notification:
+            return jsonify({'success': False, 'error': 'Notification not found'}), 404
+        
+        # Update read_by list
+        read_by = notification['read_by'] or '[]'
+        try:
+            read_by_list = eval(read_by) if read_by else []
+        except:
+            read_by_list = []
+            
+        if session['user_id'] not in read_by_list:
+            read_by_list.append(session['user_id'])
+            
+        conn.execute('''
+            UPDATE notifications 
+            SET read_by = ?, read_at = CURRENT_TIMESTAMP 
+            WHERE id = ? AND user_id = ?
+        ''', (str(read_by_list), notification_id, session['user_id']))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/chat/messages')
+@login_required
+def get_chat_messages():
+    """Get recent chat messages"""
+    try:
+        conn = get_db()
+        messages = conn.execute('''
+            SELECT cm.id, cm.message, cm.created_at, u.first_name, u.last_name
+            FROM chat_messages cm
+            JOIN users u ON cm.user_id = u.id
+            ORDER BY cm.created_at DESC
+            LIMIT 50
+        ''').fetchall()
+        conn.close()
+        
+        messages_list = []
+        for msg in messages:
+            messages_list.append({
+                'id': msg['id'],
+                'message': msg['message'],
+                'created_at': format_india_time(msg['created_at']),
+                'user_name': f"{msg['first_name']} {msg['last_name']}"
+            })
+        
+        return jsonify({
+            'success': True,
+            'messages': messages_list
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/chat/send', methods=['POST'])
+@login_required
+def send_chat_message():
+    """Send a chat message"""
+    try:
+        data = request.get_json()
+        message = data.get('message', '').strip()
+        
+        if not message:
+            return jsonify({'success': False, 'error': 'Message cannot be empty'}), 400
+        
+        conn = get_db()
+        message_id = str(uuid.uuid4())
+        conn.execute('''
+            INSERT INTO chat_messages (id, user_id, message)
+            VALUES (?, ?, ?)
+        ''', (message_id, session['user_id'], message))
+        conn.commit()
+        conn.close()
+        
+        # Emit to all connected users
+        socketio.emit('new_chat_message', {
+            'id': message_id,
+            'message': message,
+            'user_name': session.get('user_name', 'Unknown User'),
+            'created_at': datetime.now().isoformat()
+        })
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Helper function to emit notifications
 def emit_notification(user_id, notification_data):
