@@ -628,7 +628,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--primary-color);">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('web_home') }}">
+                <a class="navbar-brand" href="{{ url_for('enhanced_dashboard') }}">
                 <img src="{{ url_for('static', filename='images/cognizant_logo.png') }}" alt="Cognizant Logo" class="img-fluid">
                 SecArch Portal
             </a>
@@ -648,7 +648,7 @@
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                             {% else %}
-                            <a class="nav-link" href="{{ url_for('web_dashboard') }}">
+                            <a class="nav-link" href="{{ url_for('enhanced_dashboard') }}">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                             {% endif %}
@@ -672,12 +672,12 @@
                         <!-- User Applications (for regular users only) -->
                         {% if session.user_role == 'user' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('web_applications') }}">
+                            <a class="nav-link" href="{{ url_for('applications') }}">
                                 <i class="fas fa-laptop-code"></i> Applications
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('web_results') }}">
+                            <a class="nav-link" href="{{ url_for('results') }}">
                                 <i class="fas fa-chart-line"></i> Results
                             </a>
                         </li>
@@ -768,23 +768,23 @@
                             <i class="fas fa-user"></i> {{ session.user_name or 'User' }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('web_profile') }}">
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}">
                                 <i class="fas fa-user-edit"></i> Profile
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('web_logout') }}">
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('web_login') }}">
+                        <a class="nav-link" href="{{ url_for('login') }}">
                             <i class="fas fa-sign-in-alt"></i> Login
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('web_register') }}">
+                        <a class="nav-link" href="{{ url_for('register') }}">
                             <i class="fas fa-user-plus"></i> Register
                         </a>
                     </li>
@@ -1130,6 +1130,10 @@
         }
     });
     </script>
+    
+    <!-- WebSocket Support for Real-time Features -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/realtime.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
 </body>

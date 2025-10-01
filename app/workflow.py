@@ -34,9 +34,9 @@ class UserRole(Enum):
     ADMIN = "admin"
 
 class WorkflowEngine:
-    """Enhanced workflow management with role-based logic"""
+    """Enhanced workflow management with role-based logic and collaboration features"""
     
-    # Valid status transitions based on user role
+    # Enhanced status transitions with collaboration states
     VALID_TRANSITIONS = {
         ApplicationStatus.DRAFT: {
             UserRole.USER: [ApplicationStatus.COMPLETED, ApplicationStatus.SUBMITTED, ApplicationStatus.ARCHIVED],
@@ -49,7 +49,7 @@ class WorkflowEngine:
             UserRole.ADMIN: [ApplicationStatus.IN_REVIEW, ApplicationStatus.REJECTED, ApplicationStatus.ARCHIVED]
         },
         ApplicationStatus.IN_REVIEW: {
-            UserRole.USER: [],  # Users cannot change status during review
+            UserRole.USER: [ApplicationStatus.PENDING_CLARIFICATION],  # Users can respond to clarification requests
             UserRole.SECURITY_ANALYST: [
                 ApplicationStatus.PENDING_CLARIFICATION, 
                 ApplicationStatus.COMPLETED, 
@@ -389,6 +389,235 @@ class WorkflowEngine:
                 
         finally:
             conn.close()
+    
+    def create_clarification_request(self, application_id: str, analyst_id: str, 
+                                   question_id: str, message: str) -> Tuple[bool, Optional[str]]:
+        """
+        Create a clarification request from analyst to user
+        
+        Args:
+            application_id: ID of the application
+            analyst_id: ID of the analyst making the request
+            question_id: ID of the specific question needing clarification
+            message: Clarification message
+            
+        Returns:
+            Tuple of (success, error_message)
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect('securearch_portal.db')
+            
+            # Get application details
+            app = conn.execute('SELECT author_id, name FROM applications WHERE id = ?', 
+                             (application_id,)).fetchone()
+            if not app:
+                return False, "Application not found"
+            
+            # Create notification for user
+            notification_id = f"clarification_{application_id}_{question_id}_{int(datetime.now().timestamp())}"
+            conn.execute('''
+                INSERT INTO notifications (id, title, message, type, application_id, user_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                notification_id,
+                "Clarification Request",
+                f"Security analyst needs clarification on question: {message}",
+                "warning",
+                application_id,
+                app[0],  # author_id
+                datetime.now().isoformat()
+            ))
+            
+            # Update application status to pending clarification
+            conn.execute('''
+                UPDATE applications 
+                SET status = ?
+                WHERE id = ?
+            ''', ('pending_clarification', datetime.now().isoformat(), application_id))
+            
+            conn.commit()
+            conn.close()
+            
+            return True, None
+            
+        except Exception as e:
+            logger.error(f"Error creating clarification request: {e}")
+            return False, str(e)
+    
+    def respond_to_clarification(self, application_id: str, user_id: str, 
+                               response: str) -> Tuple[bool, Optional[str]]:
+        """
+        User responds to clarification request
+        
+        Args:
+            application_id: ID of the application
+            user_id: ID of the user responding
+            response: User's clarification response
+            
+        Returns:
+            Tuple of (success, error_message)
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect('securearch_portal.db')
+            
+            # Verify user owns the application
+            app = conn.execute('SELECT author_id FROM applications WHERE id = ?', 
+                             (application_id,)).fetchone()
+            if not app or app[0] != user_id:
+                return False, "Unauthorized access"
+            
+            # Update application status back to in_review
+            conn.execute('''
+                UPDATE applications 
+                SET status = ?
+                WHERE id = ?
+            ''', ('in_review', datetime.now().isoformat(), application_id))
+            
+            # Create notification for analyst
+            notification_id = f"clarification_response_{application_id}_{int(datetime.now().timestamp())}"
+            conn.execute('''
+                INSERT INTO notifications (id, title, message, type, application_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (
+                notification_id,
+                "Clarification Response",
+                f"User has provided clarification: {response}",
+                "info",
+                application_id,
+                datetime.now().isoformat()
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            return True, None
+            
+        except Exception as e:
+            logger.error(f"Error responding to clarification: {e}")
+            return False, str(e)
+    
+    def get_collaboration_history(self, application_id: str) -> List[Dict]:
+        """
+        Get collaboration history for an application
+        
+        Args:
+            application_id: ID of the application
+            
+        Returns:
+            List of collaboration events
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect('securearch_portal.db')
+            conn.row_factory = sqlite3.Row
+            
+            # Get notifications and status changes
+            events = conn.execute('''
+                SELECT 'notification' as event_type, title, message, created_at, 
+                       u.first_name, u.last_name, n.user_id
+                FROM notifications n
+                LEFT JOIN users u ON n.user_id = u.id
+                WHERE n.application_id = ?
+                UNION ALL
+                SELECT 'status_change' as event_type, 
+                       'Status Changed' as title,
+                       'Status updated to: ' || status as message,
+                       created_at,
+                       u.first_name, u.last_name, a.author_id as user_id
+                FROM applications a
+                LEFT JOIN users u ON a.author_id = u.id
+                WHERE a.id = ?
+                ORDER BY created_at DESC
+            ''', (application_id, application_id)).fetchall()
+            
+            conn.close()
+            return [dict(event) for event in events]
+            
+        except Exception as e:
+            logger.error(f"Error getting collaboration history: {e}")
+            return []
+    
+    def assign_analyst_automatically(self, application_id: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Automatically assign analyst based on expertise and workload
+        
+        Args:
+            application_id: ID of the application to assign
+            
+        Returns:
+            Tuple of (success, error_message, assigned_analyst_id)
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect('securearch_portal.db')
+            conn.row_factory = sqlite3.Row
+            
+            # Get application details
+            app = conn.execute('''
+                SELECT technology_stack, business_criticality, cloud_review_required, database_review_required
+                FROM applications WHERE id = ?
+            ''', (application_id,)).fetchone()
+            
+            if not app:
+                return False, "Application not found", None
+            
+            # Find available analysts with matching expertise
+            tech_stack = app['technology_stack'] or ''
+            criticality = app['business_criticality'] or 'Low'
+            
+            # Simple assignment logic - can be enhanced with ML
+            analysts = conn.execute('''
+                SELECT u.id, u.first_name, u.last_name, u.experience_level,
+                       COUNT(sr.id) as current_workload
+                FROM users u
+                LEFT JOIN security_reviews sr ON u.id = sr.analyst_id 
+                    AND sr.status IN ('in_review', 'pending_clarification')
+                WHERE u.role = 'security_analyst' AND u.is_active = 1
+                GROUP BY u.id, u.first_name, u.last_name, u.experience_level
+                ORDER BY 
+                    CASE WHEN ? = 'Critical' AND u.experience_level = 'senior' THEN 1 ELSE 2 END,
+                    current_workload ASC,
+                    u.experience_level DESC
+            ''', (criticality,)).fetchall()
+            
+            if not analysts:
+                return False, "No available analysts", None
+            
+            # Assign to the best match
+            assigned_analyst = analysts[0]
+            
+            # Update application with assigned analyst
+            conn.execute('''
+                UPDATE applications 
+                SET status = 'in_review'
+                WHERE id = ?
+            ''', (application_id,))
+            
+            # Create notification
+            notification_id = f"assignment_{application_id}_{int(datetime.now().timestamp())}"
+            conn.execute('''
+                INSERT INTO notifications (id, title, message, type, application_id, user_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                notification_id,
+                "Review Assigned",
+                f"Application assigned to {assigned_analyst['first_name']} {assigned_analyst['last_name']}",
+                "info",
+                application_id,
+                assigned_analyst['id'],
+                datetime.now().isoformat()
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            return True, None, assigned_analyst['id']
+            
+        except Exception as e:
+            logger.error(f"Error assigning analyst: {e}")
+            return False, str(e), None
 
 # Global workflow engine instance
 workflow_engine = WorkflowEngine() 

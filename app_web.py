@@ -5181,6 +5181,180 @@ def web_logout():
     flash('You have been logged out successfully.', 'info')
     return redirect(url_for('web_home'))
 
+# Enhanced Workflow API Endpoints
+@app.route('/api/workflow/clarification-request', methods=['POST'])
+@login_required
+def api_clarification_request():
+    """Create a clarification request from analyst to user"""
+    if session.get('role') != 'security_analyst':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    
+    data = request.get_json()
+    application_id = data.get('application_id')
+    question_id = data.get('question_id')
+    message = data.get('message')
+    
+    if not all([application_id, question_id, message]):
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+    
+    success, error = workflow_engine.create_clarification_request(
+        application_id, session['user_id'], question_id, message
+    )
+    
+    if success:
+        return jsonify({'success': True, 'message': 'Clarification request sent'})
+    else:
+        return jsonify({'success': False, 'error': error}), 400
+
+@app.route('/api/workflow/respond-clarification', methods=['POST'])
+@login_required
+def api_respond_clarification():
+    """User responds to clarification request"""
+    data = request.get_json()
+    application_id = data.get('application_id')
+    response = data.get('response')
+    
+    if not all([application_id, response]):
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+    
+    success, error = workflow_engine.respond_to_clarification(
+        application_id, session['user_id'], response
+    )
+    
+    if success:
+        return jsonify({'success': True, 'message': 'Clarification response sent'})
+    else:
+        return jsonify({'success': False, 'error': error}), 400
+
+@app.route('/api/workflow/collaboration-history/<app_id>')
+@login_required
+def api_collaboration_history(app_id):
+    """Get collaboration history for an application"""
+    # Verify user has access to this application
+    conn = get_db()
+    app = conn.execute('SELECT author_id FROM applications WHERE id = ?', (app_id,)).fetchone()
+    conn.close()
+    
+    if not app:
+        return jsonify({'success': False, 'error': 'Application not found'}), 404
+    
+    # Check if user is the author or an analyst/admin
+    if (app[0] != session['user_id'] and 
+        session.get('role') not in ['security_analyst', 'admin']):
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    
+    history = workflow_engine.get_collaboration_history(app_id)
+    return jsonify({'success': True, 'history': history})
+
+@app.route('/api/workflow/assign-analyst', methods=['POST'])
+@admin_required
+def api_assign_analyst():
+    """Manually assign analyst to application"""
+    data = request.get_json()
+    application_id = data.get('application_id')
+    analyst_id = data.get('analyst_id')
+    
+    if not application_id:
+        return jsonify({'success': False, 'error': 'Application ID required'}), 400
+    
+    if analyst_id:
+        # Manual assignment
+        conn = get_db()
+        try:
+            # Verify analyst exists and is active
+            analyst = conn.execute('''
+                SELECT first_name, last_name FROM users 
+                WHERE id = ? AND role = 'security_analyst' AND is_active = 1
+            ''', (analyst_id,)).fetchone()
+            
+            if not analyst:
+                return jsonify({'success': False, 'error': 'Invalid analyst'}), 400
+            
+            # Update application
+            conn.execute('''
+                UPDATE applications 
+                SET status = 'in_review', updated_at = ?
+                WHERE id = ?
+            ''', (datetime.now().isoformat(), application_id))
+            
+            # Create notification
+            notification_id = f"manual_assignment_{application_id}_{int(datetime.now().timestamp())}"
+            conn.execute('''
+                INSERT INTO notifications (id, title, message, type, application_id, user_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                notification_id,
+                "Review Assigned",
+                f"Application manually assigned to {analyst['first_name']} {analyst['last_name']}",
+                "info",
+                application_id,
+                analyst_id,
+                datetime.now().isoformat()
+            ))
+            
+            conn.commit()
+            return jsonify({'success': True, 'message': 'Analyst assigned successfully'})
+            
+        finally:
+            conn.close()
+    else:
+        # Automatic assignment
+        success, error, assigned_analyst_id = workflow_engine.assign_analyst_automatically(application_id)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Analyst assigned automatically', 'analyst_id': assigned_analyst_id})
+        else:
+            return jsonify({'success': False, 'error': error}), 400
+
+@app.route('/api/workflow/notifications')
+@login_required
+def api_get_notifications():
+    """Get notifications for current user"""
+    conn = get_db()
+    
+    # Get user's notifications
+    notifications = conn.execute('''
+        SELECT id, title, message, type, application_id, created_at, read_at
+        FROM notifications 
+        WHERE user_id = ? OR (user_id IS NULL AND target_role = ?)
+        ORDER BY created_at DESC
+        LIMIT 50
+    ''', (session['user_id'], session.get('role', 'user'))).fetchall()
+    
+    conn.close()
+    
+    return jsonify({
+        'success': True, 
+        'notifications': [dict(notif) for notif in notifications]
+    })
+
+@app.route('/api/workflow/notifications/<notification_id>/read', methods=['POST'])
+@login_required
+def api_mark_notification_read(notification_id):
+    """Mark notification as read"""
+    conn = get_db()
+    
+    # Verify user owns this notification
+    notification = conn.execute('''
+        SELECT user_id FROM notifications WHERE id = ?
+    ''', (notification_id,)).fetchone()
+    
+    if not notification or notification[0] != session['user_id']:
+        conn.close()
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    
+    # Mark as read
+    conn.execute('''
+        UPDATE notifications 
+        SET read_at = ? 
+        WHERE id = ?
+    ''', (datetime.now().isoformat(), notification_id))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Notification marked as read'})
+
 @app.route('/profile')
 @login_required
 def web_profile():

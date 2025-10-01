@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Dashboard - SecArch Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #000048;
+            --secondary-color: #05819B;
+            --success-color: #26EFE9;
+            --warning-color: #E9C71D;
+            --danger-color: #B81F2D;
+            --info-color: #2E308E;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--info-color) 100%);
+            min-height: 100vh;
+        }
+        
+        .dashboard-card {
+            transition: transform 0.2s ease-in-out;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 15px;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .navbar {
+            background: var(--primary-color) !important;
+        }
+        
+        .real-time-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .notification-bell {
+            position: relative;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .progress-ring circle {
+            fill: transparent;
+            stroke: #e9ecef;
+            stroke-width: 4;
+        }
+        
+        .progress-ring .progress {
+            stroke: #007bff;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 72, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i> SecArch Portal
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="d-flex align-items-center">
+                    <span class="real-time-indicator me-2" title="Real-time connection active"></span>
+                    <span class="text-light small me-3">Live Updates</span>
+                    <div class="notification-bell me-3">
+                        <i class="fas fa-bell fa-lg text-light" id="notification-bell"></i>
+                        <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                    </div>
+                    <a class="nav-link text-light" href="/logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h3 mb-1 text-white">Enhanced Dashboard</h1>
+                        <p class="text-light mb-0">Welcome back, {{ user_name or 'User' }}!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="dashboard-card h-100 p-4 text-center">
+                    <div class="progress-ring mx-auto mb-3">
+                        <svg class="progress-ring" width="60" height="60">
+                            <circle class="progress" cx="30" cy="30" r="26" 
+                                    stroke-dasharray="163.36" 
+                                    stroke-dashoffset="81.68" 
+                                    id="progress-ring"></circle>
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <span class="fw-bold" id="progress-text">50%</span>
+                        </div>
+                    </div>
+                    <h6 class="card-title">Review Progress</h6>
+                    <p class="text-muted small">Active Reviews</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="dashboard-card h-100 p-4 text-center">
+                    <i class="fas fa-file-alt fa-2x text-primary mb-3"></i>
+                    <h5 class="card-title" id="total-applications">0</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Total Applications</h6>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="dashboard-card h-100 p-4 text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-3"></i>
+                    <h5 class="card-title" id="pending-reviews">0</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Pending Reviews</h6>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="dashboard-card h-100 p-4 text-center">
+                    <i class="fas fa-comments fa-2x text-success mb-3"></i>
+                    <h5 class="card-title" id="active-conversations">0</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Active Conversations</h6>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Applications Panel -->
+            <div class="col-lg-8 mb-4">
+                <div class="dashboard-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Recent Applications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="applications-list">
+                            <div class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                <p class="text-muted mt-2">Loading applications...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collaboration Panel -->
+            <div class="col-lg-4 mb-4">
+                <div class="dashboard-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Real-time Collaboration</h5>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div id="collaboration-feed">
+                            <div class="text-center py-3">
+                                <i class="fas fa-comments fa-2x text-muted"></i>
+                                <p class="text-muted mt-2">No active conversations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Notifications</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="markAllAsRead()">
+                            <i class="fas fa-check"></i> Mark All Read
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="notifications-list">
+                            <div class="text-center py-3">
+                                <i class="fas fa-bell fa-2x text-muted"></i>
+                                <p class="text-muted mt-2">No notifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container">
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- WebSocket Support -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Enhanced Dashboard loaded successfully!');
+        
+        // Initialize real-time features
+        initializeRealtime();
+        
+        // Load dashboard data
+        loadDashboardData();
+        
+        // Set up periodic updates
+        setInterval(loadDashboardData, 30000); // Update every 30 seconds
+    });
+
+    function initializeRealtime() {
+        console.log('Real-time features initialized');
+        // WebSocket connection will be handled by realtime.js if available
+    }
+
+    function loadDashboardData() {
+        // Load notifications
+        fetch('/api/workflow/notifications')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateNotifications(data.notifications);
+                }
+            })
+            .catch(error => console.error('Error loading notifications:', error));
+        
+        // Load applications (placeholder)
+        loadApplications();
+    }
+
+    function loadApplications() {
+        const applicationsList = document.getElementById('applications-list');
+        applicationsList.innerHTML = `
+            <div class="list-group">
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Sample Application</h6>
+                        <small class="text-muted">2 hours ago</small>
+                    </div>
+                    <p class="mb-1">Security assessment for web application</p>
+                    <span class="badge bg-warning">In Review</span>
+                </div>
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Mobile App Review</h6>
+                        <small class="text-muted">1 day ago</small>
+                    </div>
+                    <p class="mb-1">Mobile security assessment</p>
+                    <span class="badge bg-success">Completed</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function updateNotifications(notifications) {
+        const notificationsList = document.getElementById('notifications-list');
+        const notificationCount = document.getElementById('notification-count');
+        
+        if (notifications.length === 0) {
+            notificationsList.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="fas fa-bell fa-2x text-muted"></i>
+                    <p class="text-muted mt-2">No notifications</p>
+                </div>
+            `;
+            notificationCount.style.display = 'none';
+            return;
+        }
+        
+        const unreadCount = notifications.filter(n => !n.read_at).length;
+        if (unreadCount > 0) {
+            notificationCount.textContent = unreadCount;
+            notificationCount.style.display = 'flex';
+        } else {
+            notificationCount.style.display = 'none';
+        }
+        
+        notificationsList.innerHTML = notifications.map(notif => `
+            <div class="list-group-item ${notif.read_at ? '' : 'bg-light'}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${notif.title}</h6>
+                    <small class="text-muted">${new Date(notif.created_at).toLocaleString()}</small>
+                </div>
+                <p class="mb-1">${notif.message}</p>
+                ${notif.read_at ? '' : '<button class="btn btn-sm btn-outline-primary" onclick="markAsRead(\'' + notif.id + '\')">Mark Read</button>'}
+            </div>
+        `).join('');
+    }
+
+    function markAsRead(notificationId) {
+        fetch(`/api/workflow/notifications/${notificationId}/read`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadDashboardData(); // Reload to update UI
+            }
+        })
+        .catch(error => console.error('Error marking notification as read:', error));
+    }
+
+    function markAllAsRead() {
+        console.log('Mark all as read clicked');
+        // Implement mark all as read functionality
+    }
+
+    // Real-time event handlers
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        const toastId = 'toast-' + Date.now();
+        const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center text-bg-${type === 'success' ? 'success' : (type === 'error' ? 'danger' : 'info')} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : (type === 'error' ? 'exclamation-circle' : 'info-circle')} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+        toast.show();
+        toastEl.addEventListener('hidden.bs.toast', function () {
+            toastEl.remove();
+        });
+    }
+    </script>
+</body>
+</html>
+
